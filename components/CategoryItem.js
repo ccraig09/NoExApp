@@ -81,19 +81,16 @@ const styles = StyleSheet.create({
     color: "yellow",
     fontSize: 30,
     fontWeight: "600",
-    fontFamily: "open-sans-bold",
     marginBottom: -5,
   },
   caption: {
     color: "#b8bece",
     fontWeight: "600",
     fontSize: 15,
-    fontFamily: "open-sans-bold",
     textTransform: "uppercase",
     // marginTop: 1,
   },
   title: {
-    fontFamily: "open-sans-bold",
     fontSize: 18,
     marginVertical: 2,
   },
@@ -113,13 +110,11 @@ const styles = StyleSheet.create({
     height: 50,
   },
   price: {
-    fontFamily: "open-sans",
     fontSize: 14,
     color: "#888",
   },
   difficulty: {
     color: "white",
-    fontFamily: "open-sans-bold",
     fontSize: 20,
   },
 

@@ -13,14 +13,12 @@ import styled from "styled-components";
 import ClassItem from "../components/ClassItem";
 import { AuthContext } from "../navigation/AuthProvider";
 import firebase from "../components/firebase";
-import Constants from "expo-constants";
 import * as Device from "expo-device";
 
 import Icon from "react-native-vector-icons/Ionicons";
 import Colors from "../constants/Colors";
 import { Avatar } from "react-native-elements";
 import { useFocusEffect } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Moment from "moment";
 import { extendMoment } from "moment-range";
 import * as Notifications from "expo-notifications";
@@ -54,14 +52,12 @@ const HomeScreen = ({ navigation }) => {
   const [sportsClasses, setSportsClasses] = useState([]);
   const [kidsClasses, setKidsClasses] = useState([]);
   const [Level1, setLevel1] = useState([]);
-  const [userName, setUserName] = useState();
   const [userInfo, setUserInfo] = useState([]);
   const [notificationList, setNotificationList] = useState([]);
   const [userImage, setUserImage] = useState(null);
-  const [expoPushToken, setExpoPushToken] = useState("");
+  // const [expoPushToken, setExpoPushToken] = useState("");
 
-  const { user, deleteProduct, addToken } = useContext(AuthContext);
-  const db = firebase.firestore().collection("Members");
+  const { user, addToken } = useContext(AuthContext);
 
   const width = Dimensions.get("window").width;
   const moment = extendMoment(Moment);
@@ -72,121 +68,28 @@ const HomeScreen = ({ navigation }) => {
 
   const dateDiff = moment.duration(date2.diff(date1)).asDays();
 
-  useEffect(() => {
-    // dailyNotification();
-    console.log("is a device?", Device.isDevice);
-  }, []);
-
-  async function registerForPushNotificationsAsync() {
-    let token;
-    if (Constants.isDevice) {
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== "granted") {
-        Alert.alert(
-          "Alerta",
-          "No recibirá noticias si no habilita las notificaciones. Si desea recibir notificaciones, habilitelas desde configuración.",
-          [
-            { text: "Cancel" },
-            // If they said no initially and want to change their mind,
-            // we can automatically open our app in their settings
-            // so there's less friction in turning notifications on
-            {
-              text: "Activar Notificaciones",
-              onPress: () =>
-                Platform.OS === "ios"
-                  ? Linking.openURL("app-settings:")
-                  : Linking.openSettings(),
-            },
-          ]
-        );
-        return;
-      }
-      token = (await Notifications.getExpoPushTokenAsync()).data;
-      // console.log(token);
-    } else {
-      alert("Must use physical device for Push Notifications");
-      token = null;
-    }
-
-    if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-      });
-    }
-    return token;
-  }
-  const triggerPlanReminderNotification = async () => {
-    const date2 = moment(`${userInfo.endDate} 8:30`, "DD-MM-YYYY hh:mm");
-    const date3 = moment(date2, "DD-MM-YYYY").subtract(2, "days");
-    const test = await Notifications.getAllScheduledNotificationsAsync();
-    console.log("checking all notes", test);
-    await Notifications.cancelAllScheduledNotificationsAsync();
-
-    if (date3 > new Date()) {
-      console.log("Bingo! going to schedule 2 day alert");
-
-      const trigger = new Date(date3);
-      // trigger.setMinutes(50);
-      // trigger.setHours(14);
-
-      console.log(date3);
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: `Hola ${userInfo.FirstName}, Tu plan se acabara pronto`,
-          body: "Falta 2 dias hasta que acaba tu plan! Seguir logrando tus metas y considerar renovando pronto por un discuento",
-          data: userInfo,
-        },
-        trigger,
-      });
-    } else {
-      console.log("inside of 2 days, no scheduling needed");
-    }
-
-    // const toCancel = test.filter(
-    //   (info) => info.content.data.userId == user.uid
-    // );
-    // const cancelList = toCancel. ((id) => id.identifier)[0];
-    // await Notifications.cancelScheduledNotificationAsync(cancelList);
-    // console.log("checking all notes cancel", cancelList.length);
-  };
-  useEffect(() => {
-    (async () => {
-      const { status } = await requestTrackingPermissionsAsync();
-      if (status === "granted") {
-        console.log("Yay! I have user permission to track data");
-      }
-    })();
-    const backgroundSubscription =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        // console.log("background", response);
-        // navigation.navigate("Edit");
-      });
-
-    const foregroundSubscription =
-      Notifications.addNotificationReceivedListener((notification) => {
-        console.log("foreground", notification);
-      });
-    return () => {
-      backgroundSubscription.remove();
-      foregroundSubscription.remove();
-    };
-  }, []);
-
   useFocusEffect(
     React.useCallback(() => {
-      registerForPushNotificationsAsync().then((token) => {
-        setExpoPushToken(token);
-        addToken(token);
-      });
+      const fetchMemberDetails = async () => {
+        try {
+          await firebase
+            .firestore()
+            .collection("Members")
+            .doc(user.uid)
+            .get()
+            .then((doc) => {
+              if (doc.exists) {
+                setUserInfo(doc.data());
+                console.log(">>>>checking user details", doc.data());
+              } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+              }
+            });
+        } catch (e) {
+          console.log(e);
+        }
+      };
       // console.log("loading home and user", user);
       const fetchClasses = async () => {
         try {
@@ -220,10 +123,10 @@ const HomeScreen = ({ navigation }) => {
                 });
               });
             });
-          console.log(
-            "classes",
-            list.filter((data) => data.Category == "fitness")
-          );
+          // console.log(
+          //   "classes",
+          //   list.filter((data) => data.Category == "fitness")
+          // );
           setFitnessClasses(
             list
               .filter((data) => data.Category == "fitness")
@@ -238,27 +141,7 @@ const HomeScreen = ({ navigation }) => {
           console.log(e);
         }
       };
-      const fetchMemberDetails = async () => {
-        try {
-          const list = [];
-          await firebase
-            .firestore()
-            .collection("Members")
-            .doc(user.uid)
-            .get()
-            .then((doc) => {
-              if (doc.exists) {
-                // console.log("Document data:", doc.data());
-                setUserInfo(doc.data());
-              } else {
-                // doc.data() will be undefined in this case
-                console.log("No such document!");
-              }
-            });
-        } catch (e) {
-          console.log(e);
-        }
-      };
+
       const fetchNotifications = async () => {
         try {
           const list = [];
@@ -308,20 +191,122 @@ const HomeScreen = ({ navigation }) => {
         } catch (e) {
           console.log(e);
         }
+        fetchMemberDetails();
       };
+      registerForPushNotificationsAsync().then((token) => {
+        // setExpoPushToken(token);
+        addToken(token);
+      });
 
       fetchNotifications();
-      fetchMemberDetails();
       fetchClasses();
-      triggerPlanReminderNotification();
-
-      AsyncStorage.getItem("userData").then((value) => {
-        const data = JSON.parse(value);
-        // console.log(typeof data.Fir);
-        setUserName(typeof data === "object" ? "" : data.givenName);
-      });
+      // triggerPlanReminderNotification();
     }, [])
   );
+
+  async function registerForPushNotificationsAsync() {
+    let token;
+    if (Device.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        Alert.alert(
+          "Alerta",
+          "No recibirá noticias si no habilita las notificaciones. Si desea recibir notificaciones, habilitelas desde configuración.",
+          [
+            { text: "Cancel" },
+            // If they said no initially and want to change their mind,
+            // we can automatically open our app in their settings
+            // so there's less friction in turning notifications on
+            {
+              text: "Activar Notificaciones",
+              onPress: () =>
+                Platform.OS === "ios"
+                  ? Linking.openURL("app-settings:")
+                  : Linking.openSettings(),
+            },
+          ]
+        );
+        return;
+      }
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+      // console.log(token);
+    } else {
+      alert("Must use physical device for Push Notifications");
+      token = null;
+    }
+
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+    return token;
+  }
+  // const triggerPlanReminderNotification = async () => {
+  //   const date2 = moment(`${userInfo.endDate} 8:30`, "DD-MM-YYYY hh:mm");
+  //   const date3 = moment(date2, "DD-MM-YYYY").subtract(2, "days");
+  //   const test = await Notifications.getAllScheduledNotificationsAsync();
+  //   console.log("checking all notes", test);
+  //   await Notifications.cancelAllScheduledNotificationsAsync();
+
+  //   if (date3 > new Date()) {
+  //     console.log("Bingo! going to schedule 2 day alert");
+
+  //     const trigger = new Date(date3);
+  //     // trigger.setMinutes(50);
+  //     // trigger.setHours(14);
+
+  //     console.log(date3);
+  //     await Notifications.scheduleNotificationAsync({
+  //       content: {
+  //         title: `Hola ${userInfo.FirstName}, Tu plan se acabara pronto`,
+  //         body: "Falta 2 dias hasta que acaba tu plan! Seguir logrando tus metas y considerar renovando pronto por un discuento",
+  //         data: userInfo,
+  //       },
+  //       trigger,
+  //     });
+  //   } else {
+  //     console.log("inside of 2 days, no scheduling needed");
+  //   }
+
+  //   // const toCancel = test.filter(
+  //   //   (info) => info.content.data.userId == user.uid
+  //   // );
+  //   // const cancelList = toCancel. ((id) => id.identifier)[0];
+  //   // await Notifications.cancelScheduledNotificationAsync(cancelList);
+  //   // console.log("checking all notes cancel", cancelList.length);
+  // };
+  useEffect(() => {
+    (async () => {
+      const { status } = await requestTrackingPermissionsAsync();
+      if (status === "granted") {
+        console.log("Yay! I have user permission to track data");
+      }
+    })();
+    const backgroundSubscription =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        // console.log("background", response);
+        // navigation.navigate("Edit");
+      });
+
+    const foregroundSubscription =
+      Notifications.addNotificationReceivedListener((notification) => {
+        console.log("foreground", notification);
+      });
+    return () => {
+      backgroundSubscription.remove();
+      foregroundSubscription.remove();
+    };
+  }, []);
 
   return (
     <SafeAreaView style={styles.Container}>
@@ -342,7 +327,7 @@ const HomeScreen = ({ navigation }) => {
           icon={{ name: "user", type: "font-awesome" }}
           // }
           // style={{ padding: 0 }}
-          source={{ uri: null }}
+          source={{ uri: `${userInfo?.userImg}` }}
           onPress={() => {
             if (!userInfo.userImg) {
               navigation.navigate("Edit");
@@ -379,26 +364,22 @@ const HomeScreen = ({ navigation }) => {
             {/* <View style={{ flexDirection: "row" }}> */}
             <Text style={styles.hello}>
               {!userInfo.FirstName ? (
-                userName === "" ? (
-                  <TouchableOpacity
-                    onPress={() => {
-                      navigation.navigate("Edit");
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate("Edit");
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "silver",
+                      marginTop: 5,
+                      fontWeight: "bold",
+                      textDecorationLine: "underline",
                     }}
                   >
-                    <Text
-                      style={{
-                        color: "silver",
-                        marginTop: 5,
-                        fontWeight: "bold",
-                        textDecorationLine: "underline",
-                      }}
-                    >
-                      Agregar Nombre
-                    </Text>
-                  </TouchableOpacity>
-                ) : (
-                  userName
-                )
+                    Agregar Nombre
+                  </Text>
+                </TouchableOpacity>
               ) : (
                 userInfo.FirstName
               )}

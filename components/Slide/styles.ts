@@ -32,7 +32,6 @@ export const styles = StyleSheet.create({
     textAlign: "left",
     fontSize: 20,
     color: "grey",
-    fontFamily: "aliens",
   },
   title: {
     // width: "100%",

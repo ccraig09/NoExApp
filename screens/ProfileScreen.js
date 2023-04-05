@@ -39,6 +39,7 @@ import EvalBlock from "../components/EvalBlock";
 // import Carousel from "../components/Carousel";
 // import Carousel from './Carousel';
 import * as Linking from "expo-linking";
+import Icon from "react-native-vector-icons/Ionicons";
 
 // import { AsyncStorage } from "react-native";
 import Colors from "../constants/Colors";
@@ -105,6 +106,10 @@ const ProfileScreen = ({ navigation }) => {
 
   const [showAll, setShowAll] = useState(true);
   const moment = extendMoment(Moment);
+  var date1 = moment().startOf("day");
+  var date2 = moment(userInfo.endDate, "DD-MM-YYYY");
+
+  const dateDiff = moment.duration(date2.diff(date1)).asDays();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -120,6 +125,7 @@ const ProfileScreen = ({ navigation }) => {
               if (doc.exists) {
                 // console.log("Document data:", doc.data());
                 setUserInfo(doc.data());
+                console.log(">>>>checking user details", doc.data());
               } else {
                 // doc.data() will be undefined in this case
                 console.log("No such document!");
@@ -447,7 +453,52 @@ const ProfileScreen = ({ navigation }) => {
                 </View>
               </AvatarView>
             </Header>
+            {userInfo.endDate ? (
+              <Text style={styles.expire}>Plan hasta:</Text>
+            ) : (
+              <Text style={styles.expire}>Actualizar Plan</Text>
+            )}
+            <View style={{ flexDirection: "row" }}>
+              {!isNaN(dateDiff) && (
+                <Text style={{ color: "grey", fontWeight: "bold" }}>
+                  {dateDiff < 0 ? "Hace " : "En "}
+                </Text>
+              )}
+              <Text
+                style={{
+                  color: isNaN(dateDiff)
+                    ? "orange"
+                    : dateDiff < 3
+                    ? "red"
+                    : "green",
+                  fontWeight: "bold",
+                }}
+              >
+                {isNaN(dateDiff) ? "" : Math.abs(Math.round(dateDiff))}
+              </Text>
+              {!isNaN(dateDiff) && (
+                <Text style={{ color: "grey", fontWeight: "bold" }}> Dias</Text>
+              )}
+            </View>
+            <Text style={{ fontWeight: "bold" }}>
+              Puntos: {!userInfo.points ? "0" : userInfo.points}
+            </Text>
           </TouchableOpacity>
+
+          <View>
+            <View>
+              <Subtitle>{"infomacion".toUpperCase()}</Subtitle>
+            </View>
+            <Icon.Button
+              name="qr-code"
+              size={80}
+              color="black"
+              backgroundColor="#f0f3f5"
+              onPress={() => {
+                navigation.navigate("Qr");
+              }}
+            />
+          </View>
 
           <View style={styles.edit}>
             <TouchableOpacity
@@ -973,7 +1024,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 25,
     color: "#6C6C6C",
-    fontFamily: "open-sans-bold",
   },
 
   displayName: {
@@ -1015,6 +1065,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingTop: 20,
     paddingBottom: 20,
+  },
+  expire: {
+    fontWeight: "bold",
+    color: "silver",
+    fontSize: 15,
   },
 });
 

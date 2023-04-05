@@ -35,7 +35,6 @@ const BasicInfoScroll = (props) => {
           <Text style={styles.basicInfo}>EDAD</Text>
           <Text
             style={{
-              fontFamily: "aliens",
               color: "grey",
               fontSize: 20,
               textAlign: "center",
@@ -58,7 +57,6 @@ const BasicInfoScroll = (props) => {
           <Text style={styles.basicInfo}>ESTATURA</Text>
           <Text
             style={{
-              fontFamily: "aliens",
               color: "#ffc733",
               fontSize: 20,
               textAlign: "center",
@@ -80,7 +78,6 @@ const BasicInfoScroll = (props) => {
           <Text style={styles.basicInfo}>PESO</Text>
           <Text
             style={{
-              fontFamily: "aliens",
               color: "grey",
               fontSize: 20,
               textAlign: "center",
@@ -102,7 +99,6 @@ const BasicInfoScroll = (props) => {
           <Text style={styles.basicInfo}>GÉNERO</Text>
           <Text
             style={{
-              fontFamily: "aliens",
               color: "#ffc733",
               fontSize: 20,
               textAlign: "center",

@@ -32,7 +32,6 @@ const styles = StyleSheet.create({
   },
   caption: {
     fontSize: 20,
-    fontFamily: "open-sans-bold",
     marginBottom: 20,
   },
   userInfoTitleId: {

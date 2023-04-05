@@ -1,20 +1,32 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Button } from "react-native";
+import React from "react";
+import "react-native-gesture-handler";
+import Providers from "./navigation";
+import * as SplashScreen from "expo-splash-screen";
+import { useFonts } from "expo-font";
+
+import { LogBox } from "react-native";
+
+SplashScreen.preventAutoHideAsync();
+LogBox.ignoreLogs(["Setting a timer for a long period of time"]);
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Button title="" onPress={() => alert("")} />
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+  const [fontsLoaded] = useFonts({
+    aliens: require("./assets/fonts/aliens.ttf"),
+    "Kufam-SemiBoldItalic": require("./assets/fonts/Kufam-SemiBoldItalic.ttf"),
+    "Lato-Bold": require("./assets/fonts/Lato-Bold.ttf"),
+    "Lato-BoldItalic": require("./assets/fonts/Lato-BoldItalic.ttf"),
+    "Lato-Italic": require("./assets/fonts/Lato-Italic.ttf"),
+    "Lato-Regular": require("./assets/fonts/Lato-Regular.ttf"),
+    "open-sans": require("./assets/fonts/OpenSans-Regular.ttf"),
+    "open-sans-bold": require("./assets/fonts/OpenSans-Bold.ttf"),
+  });
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "gold",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+  if (fontsLoaded) {
+    SplashScreen.hideAsync();
+  }
+
+  if (!fontsLoaded) {
+    return null;
+  }
+  return <Providers />;
+}

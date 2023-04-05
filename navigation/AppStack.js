@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Text } from "react-native";
-import { createStackNavigator } from "@react-navigation/stack";
-// import { createDrawerNavigator } from "@react-navigation/drawer";
+import React from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/Ionicons";
 import HomeScreen from "../screens/HomeScreen";
@@ -23,7 +21,7 @@ import ReviewScreen from "../screens/ReviewScreen";
 import NotificationScreen from "../screens/NotificationScreen";
 import AwardsScreen from "../screens/AwardsScreen";
 
-const Stack = createStackNavigator();
+const { Navigator, Screen } = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 // const Drawer = createDrawerNavigator();
 
@@ -51,7 +49,7 @@ const AppStack = () => {
   // }
   return (
     <Tab.Navigator
-      initialRouteName="Main"
+      initialRouteName="ProfileTab"
       screenOptions={{
         tabBarActiveTintColor: Colors.noExprimary,
         tabBarStyle: [
@@ -63,20 +61,17 @@ const AppStack = () => {
       }}
       style={{ backgroundColor: "blue" }}
     >
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Main"
         component={HomeStack}
         options={{
           headerShown: false,
           tabBarLabel: "Inicio",
-          tabBarIcon: ({ color, focused }) =>
-            focused ? (
-              <Icon name="ios-home" color={color} size={30} />
-            ) : (
-              <Icon name="ios-home" color={color} size={26} />
-            ),
+          tabBarIcon: ({ color }) => (
+            <Icon name="ios-home" color={color} size={30} />
+          ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name="ProfileTab"
         component={ProfileStackScreen}
@@ -125,43 +120,43 @@ const AppStack = () => {
 };
 
 const HomeStack = () => (
-  <Stack.Navigator initialRouteName="Home">
-    <Stack.Screen
+  <Navigator initialRouteName="Home">
+    <Screen
       name="Home"
       component={HomeScreen}
       options={{
         headerShown: false,
       }}
     />
-    <Stack.Screen
+    <Screen
       name="Onboarding"
       component={OnboardingScreen}
       options={{
         title: "Niveles",
       }}
     />
-    <Stack.Screen
+    <Screen
       name="Section"
       component={SectionScreen}
       options={{
         title: "Niveles",
       }}
     />
-    <Stack.Screen
+    <Screen
       name="Details"
       component={DetailsScreen}
       options={{
         title: "Niveles",
       }}
     />
-    <Stack.Screen
+    <Screen
       name="Video"
       component={VideoScreen}
       options={{
         title: "Niveles",
       }}
     />
-    <Stack.Screen
+    <Screen
       name="Review"
       component={ReviewScreen}
       options={{
@@ -169,14 +164,14 @@ const HomeStack = () => (
         // title: "Niveles",
       }}
     />
-    <Stack.Screen
+    <Screen
       name="Qr"
       component={QrScreen}
       options={{
         title: "Codigo Qr",
       }}
     />
-    <Stack.Screen
+    <Screen
       name="Notification"
       component={NotificationScreen}
       options={({ navigation }) => ({
@@ -184,19 +179,19 @@ const HomeStack = () => (
         headerShown: true,
       })}
     />
-    <Stack.Screen
+    <Screen
       name="Edit"
       component={EditProfileScreen}
       options={{
         title: "Editar Perfil",
       }}
     />
-  </Stack.Navigator>
+  </Navigator>
 );
 
 const ProfileStackScreen = ({ navigation }) => (
-  <Stack.Navigator>
-    <Stack.Screen
+  <Navigator>
+    <Screen
       name="Profile"
       component={ProfileScreen}
       options={({ navigation }) => ({
@@ -204,14 +199,14 @@ const ProfileStackScreen = ({ navigation }) => (
         headerShown: false,
       })}
     />
-    <Stack.Screen
+    <Screen
       name="Edit"
       component={EditProfileScreen}
       options={{
         title: "Editar Perfil",
       }}
     />
-    <Stack.Screen
+    <Screen
       name="Eval"
       component={EvalScreen}
       options={{
@@ -219,7 +214,7 @@ const ProfileStackScreen = ({ navigation }) => (
         headerShown: false,
       }}
     />
-    <Stack.Screen
+    <Screen
       name="Edit Eval"
       component={EditEvalScreen}
       options={{
@@ -227,22 +222,29 @@ const ProfileStackScreen = ({ navigation }) => (
         headerShown: true,
       }}
     />
-  </Stack.Navigator>
+    <Screen
+      name="Qr"
+      component={QrScreen}
+      options={{
+        title: "Codigo Qr",
+      }}
+    />
+  </Navigator>
 );
 const AwardsStack = ({ navigation }) => (
-  <Stack.Navigator>
-    <Stack.Screen
+  <Navigator>
+    <Screen
       name="Awards"
       component={AwardsScreen}
       options={{
         title: "Logros",
       }}
     />
-  </Stack.Navigator>
+  </Navigator>
 );
 const InformationStack = ({ navigation }) => (
-  <Stack.Navigator>
-    <Stack.Screen
+  <Navigator>
+    <Screen
       name="Information"
       component={InformationScreen}
       options={({ navigation }) => ({
@@ -250,7 +252,7 @@ const InformationStack = ({ navigation }) => (
         headerShown: true,
       })}
     />
-    <Stack.Screen
+    <Screen
       name="PromoDetail"
       component={PromoDetailScreen}
       options={({ navigation }) => ({
@@ -258,7 +260,7 @@ const InformationStack = ({ navigation }) => (
         headerShown: true,
       })}
     />
-  </Stack.Navigator>
+  </Navigator>
 );
 
 export default AppStack;

@@ -2,27 +2,59 @@
   "expo": {
     "name": "NoExApp",
     "slug": "NoExApp",
-    "version": "1.0.0",
+    "version": "3.1.1",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/appOldLogo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/icon-noexlogo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
+    "plugins": [
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to upload user profile images and progress images.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos of results.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/logonoe96.png",
+          "color": "#ffffff",
+          "mode": "production"
+        }
+      ],
+      "expo-tracking-transparency"
     ],
+    "assetBundlePatterns": ["**/*"],
+
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ccraig09.NoExApp"
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to upload user profile images and progress images",
+        "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos to upload user profile images and progress images.",
+        "NSUserTrackingUsageDescription": "Your User ID will be used to keep all data stored to your specific ID for your experience",
+        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos of results."
+      },
+      "bundleIdentifier": "com.ccraig09.NoExcusasFTC"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "foregroundImage": "./assets/appOldLogo.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.ccraig09.NoExcusasFTC",
+      "googleServicesFile": "./google-services.json",
+      "versionCode": 42,
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

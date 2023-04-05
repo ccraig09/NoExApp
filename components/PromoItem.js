@@ -101,7 +101,6 @@ const styles = StyleSheet.create({
   caption: {
     fontSize: 20,
     color: "white",
-    fontFamily: "open-sans-bold",
     fontWeight: "600",
   },
   subtitle: {
