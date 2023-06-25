@@ -379,14 +379,7 @@ const ProfileScreen = ({ navigation }) => {
             />
           }
         >
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("Edit", {
-                // avatar: userPhoto,
-                // name: firstName,
-              })
-            }
-          >
+          <View>
             <Header>
               <AvatarView>
                 <Avatar
@@ -396,108 +389,109 @@ const ProfileScreen = ({ navigation }) => {
                   source={{ uri: `${userInfo.userImg}` }}
                   showEditButton={true}
                 />
-                <View style={styles.displayName}>
-                  <Text style={styles.hello}>{greetingMessage}, </Text>
-                  <Text style={styles.name}>
-                    {!userInfo.FirstName ? (
-                      userName === "" ? (
-                        <TouchableOpacity
-                          onPress={() => {
-                            navigation.navigate("Edit");
-                          }}
-                        >
-                          <Text
-                            style={{
-                              color: "silver",
-                              marginTop: 5,
-                              fontWeight: "bold",
-                              textDecorationLine: "underline",
+                <View style={{ flexDirection: "row", paddingRight: 10 }}>
+                  <View style={styles.displayName}>
+                    <Text style={styles.hello}>{greetingMessage}, </Text>
+                    <Text style={styles.name}>
+                      {!userInfo.FirstName ? (
+                        userName === "" ? (
+                          <TouchableOpacity
+                            onPress={() => {
+                              navigation.navigate("Edit");
                             }}
                           >
-                            Agregar Nombre
-                          </Text>
-                        </TouchableOpacity>
+                            <Text
+                              style={{
+                                color: "silver",
+                                marginTop: 5,
+                                fontWeight: "bold",
+                                textDecorationLine: "underline",
+                              }}
+                            >
+                              Agregar Nombre
+                            </Text>
+                          </TouchableOpacity>
+                        ) : (
+                          userName
+                        )
                       ) : (
-                        userName
-                      )
-                    ) : (
-                      userInfo.FirstName
-                    )}
-                  </Text>
-                  <View style={styles.button2}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        navigation.navigate("Edit");
-                      }}
-                    >
-                      <Text style={{ fontSize: 13 }}>Editar Perfil</Text>
-                    </TouchableOpacity>
+                        userInfo.FirstName
+                      )}
+                    </Text>
+                    <View style={styles.button2}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          navigation.navigate("Edit");
+                        }}
+                      >
+                        <Text style={{ fontSize: 13 }}>Editar Perfil</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.button3}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (userInfo?.pdf) {
+                            Linking.openURL(userInfo?.pdf);
+                          } else {
+                            alert(
+                              "No tienes un entrenmiento personalizado aun. Por favor contacta a tu entrenador"
+                            );
+                          }
+                        }}
+                      >
+                        <Text style={{ fontSize: 13 }}>
+                          Mi Entrenamiento Personalizado
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <View style={styles.button3}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        if (userInfo?.pdf) {
-                          Linking.openURL(userInfo?.pdf);
-                        } else {
-                          alert(
-                            "No tienes un entrenmiento personalizado aun. Por favor contacta a tu entrenador"
-                          );
-                        }
-                      }}
-                    >
-                      <Text style={{ fontSize: 13 }}>
-                        Mi Entrenamiento Personalizado
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                  <Icon.Button
+                    name="qr-code"
+                    size={60}
+                    color="black"
+                    backgroundColor="transparent"
+                    onPress={() => {
+                      navigation.navigate("Qr");
+                    }}
+                  />
                 </View>
               </AvatarView>
             </Header>
-            {userInfo.endDate ? (
-              <Text style={styles.expire}>Plan hasta:</Text>
-            ) : (
-              <Text style={styles.expire}>Actualizar Plan</Text>
-            )}
-            <View style={{ flexDirection: "row" }}>
-              {!isNaN(dateDiff) && (
-                <Text style={{ color: "grey", fontWeight: "bold" }}>
-                  {dateDiff < 0 ? "Hace " : "En "}
+            <View style={styles.planDetails}>
+              {userInfo.endDate ? (
+                <Text style={styles.expire}>Plan hasta:</Text>
+              ) : (
+                <Text style={styles.expire}>Actualizar Plan</Text>
+              )}
+              <View style={{ flexDirection: "row" }}>
+                {!isNaN(dateDiff) && (
+                  <Text style={{ color: "grey", fontWeight: "bold" }}>
+                    {dateDiff < 0 ? "Hace " : "En "}
+                  </Text>
+                )}
+                <Text
+                  style={{
+                    color: isNaN(dateDiff)
+                      ? "orange"
+                      : dateDiff < 3
+                      ? "red"
+                      : "green",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {isNaN(dateDiff) ? "" : Math.abs(Math.round(dateDiff))}
                 </Text>
-              )}
-              <Text
-                style={{
-                  color: isNaN(dateDiff)
-                    ? "orange"
-                    : dateDiff < 3
-                    ? "red"
-                    : "green",
-                  fontWeight: "bold",
-                }}
-              >
-                {isNaN(dateDiff) ? "" : Math.abs(Math.round(dateDiff))}
+                {!isNaN(dateDiff) && (
+                  <Text style={{ color: "grey", fontWeight: "bold" }}>
+                    {" "}
+                    Dias
+                  </Text>
+                )}
+              </View>
+              <Text style={{ fontWeight: "bold" }}>
+                Puntos: {!userInfo.points ? "0" : userInfo.points}
               </Text>
-              {!isNaN(dateDiff) && (
-                <Text style={{ color: "grey", fontWeight: "bold" }}> Dias</Text>
-              )}
             </View>
-            <Text style={{ fontWeight: "bold" }}>
-              Puntos: {!userInfo.points ? "0" : userInfo.points}
-            </Text>
-          </TouchableOpacity>
-
-          <View>
-            <View>
-              <Subtitle>{"infomacion".toUpperCase()}</Subtitle>
-            </View>
-            <Icon.Button
-              name="qr-code"
-              size={80}
-              color="black"
-              backgroundColor="#f0f3f5"
-              onPress={() => {
-                navigation.navigate("Qr");
-              }}
-            />
           </View>
 
           <View style={styles.edit}>
@@ -1043,6 +1037,9 @@ const styles = StyleSheet.create({
   },
   screen: {
     flex: 1,
+  },
+  planDetails: {
+    paddingLeft: 20,
   },
   picker: {
     marginBottom: 80,
