@@ -1,7 +1,6 @@
 import React, { useState, useContext } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import QRCode from "react-native-qrcode-svg";
-import Colors from "../constants/Colors";
 import { AuthContext } from "../navigation/AuthProvider";
 
 const QrScreen = () => {
@@ -11,13 +10,13 @@ const QrScreen = () => {
     <View style={styles.Container}>
       <Text style={styles.caption}>Escanear codigo para iniciar sesion.</Text>
       <QRCode
-        value={user.uid}
+        value={user?.uid}
         logo={require("../assets/icon-noexlogo.png")}
         logoSize={50}
         logoBackgroundColor="transparent"
         size={250}
       />
-      <Text style={styles.userInfoTitleId}>id: {user.uid}</Text>
+      <Text style={styles.userInfoTitleId}>id: {user?.uid}</Text>
     </View>
   );
 };

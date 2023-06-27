@@ -81,7 +81,7 @@ const ImgPicker = (props) => {
     });
     console.log(result);
 
-    if (!result.cancelled) {
+    if (!result.canceled) {
       props.onImageTaken(result.uri);
       actionSheetRef.current?.hide();
     }
@@ -112,7 +112,7 @@ const ImgPicker = (props) => {
     });
     console.log(result);
 
-    if (!result.cancelled) {
+    if (!result.canceled) {
       props.onImageTaken(result.uri);
       actionSheetRef.current?.hide();
     }
@@ -226,7 +226,7 @@ const ImgPicker = (props) => {
           <View>
             <TouchableOpacity
               onPress={() => {
-                actionSheetRef.current?.setModalVisible();
+                actionSheetRef.current?.show();
               }}
               style={{
                 justifyContent: "center",

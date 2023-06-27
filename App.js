@@ -7,7 +7,10 @@ import { useFonts } from "expo-font";
 import { LogBox } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
-LogBox.ignoreLogs(["Setting a timer for a long period of time"]);
+LogBox.ignoreLogs([
+  "Setting a timer for a long period of time",
+  "Animated: `useNativeDriver` was not specified.",
+]);
 
 export default function App() {
   const [fontsLoaded] = useFonts({

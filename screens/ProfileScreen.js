@@ -67,6 +67,10 @@ import firebase from "../components/firebase";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import Moment from "moment";
 import { extendMoment } from "moment-range";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
+import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
+import ActionButton from "react-native-action-button";
 
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -85,8 +89,17 @@ const greetingMessage =
     ? "Buenas Noches" // if for some reason the calculation didn't work
     : "Bienvenido";
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => {
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+    };
+  },
+});
+
 const ProfileScreen = ({ navigation }) => {
-  const { user, newEval, deleteEval } = useContext(AuthContext);
+  const { user, newEval, deleteEval, addToken } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showEval, setShowEval] = useState(true);
@@ -161,6 +174,11 @@ const ProfileScreen = ({ navigation }) => {
           console.log(e);
         }
       };
+      registerForPushNotificationsAsync().then((token) => {
+        // setExpoPushToken(token);
+        console.log(token);
+        addToken(token);
+      });
 
       fetchMemberDetails();
       fetchMemberEvals();
@@ -213,6 +231,77 @@ const ProfileScreen = ({ navigation }) => {
       console.log(e);
     }
   };
+  async function registerForPushNotificationsAsync() {
+    console.log("notifications ran");
+    let token;
+    if (Device.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        Alert.alert(
+          "Alerta",
+          "No recibirá noticias si no habilita las notificaciones. Si desea recibir notificaciones, habilitelas desde configuración.",
+          [
+            { text: "Cancel" },
+            // If they said no initially and want to change their mind,
+            // we can automatically open our app in their settings
+            // so there's less friction in turning notifications on
+            {
+              text: "Activar Notificaciones",
+              onPress: () =>
+                Platform.OS === "ios"
+                  ? Linking.openURL("app-settings:")
+                  : Linking.openSettings(),
+            },
+          ]
+        );
+        return;
+      }
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+      // console.log(token);
+    } else {
+      alert("Must use physical device for Push Notifications");
+      token = null;
+    }
+
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+    return token;
+  }
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await requestTrackingPermissionsAsync();
+      if (status === "granted") {
+        console.log("Yay! I have user permission to track data");
+      }
+    })();
+    const backgroundSubscription =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        // console.log("background", response);
+        // navigation.navigate("Edit");
+      });
+
+    const foregroundSubscription =
+      Notifications.addNotificationReceivedListener((notification) => {
+        console.log("foreground", notification);
+      });
+    return () => {
+      backgroundSubscription.remove();
+      foregroundSubscription.remove();
+    };
+  }, []);
 
   const frontImageTakenHandler = useCallback(async (uri) => {
     p;
@@ -379,118 +468,88 @@ const ProfileScreen = ({ navigation }) => {
             />
           }
         >
-          <View>
-            <Header>
-              <AvatarView>
-                <Avatar
-                  rounded
-                  size="xlarge"
-                  style={{ width: 100, height: 100 }}
-                  source={{ uri: `${userInfo.userImg}` }}
-                  showEditButton={true}
-                />
-                <View style={{ flexDirection: "row", paddingRight: 10 }}>
-                  <View style={styles.displayName}>
-                    <Text style={styles.hello}>{greetingMessage}, </Text>
-                    <Text style={styles.name}>
-                      {!userInfo.FirstName ? (
-                        userName === "" ? (
-                          <TouchableOpacity
-                            onPress={() => {
-                              navigation.navigate("Edit");
-                            }}
-                          >
-                            <Text
-                              style={{
-                                color: "silver",
-                                marginTop: 5,
-                                fontWeight: "bold",
-                                textDecorationLine: "underline",
-                              }}
-                            >
-                              Agregar Nombre
-                            </Text>
-                          </TouchableOpacity>
-                        ) : (
-                          userName
-                        )
-                      ) : (
-                        userInfo.FirstName
-                      )}
-                    </Text>
-                    <View style={styles.button2}>
+          <View style={{ flexDirection: "row" }}>
+            <View>
+              <Avatar
+                rounded
+                size="xlarge"
+                style={{ width: 90, height: 90, marginLeft: 10 }}
+                source={{ uri: `${userInfo.userImg}` }}
+                // showEditButton={true}
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                // justifyContent: "space-around",
+                paddingHorizontal: 10,
+                // width: 200,
+              }}
+            >
+              <View style={styles.displayName}>
+                <Text style={styles.hello}>{greetingMessage}, </Text>
+                <Text style={styles.name}>
+                  {!userInfo.FirstName ? (
+                    userName === "" ? (
                       <TouchableOpacity
                         onPress={() => {
                           navigation.navigate("Edit");
                         }}
                       >
-                        <Text style={{ fontSize: 13 }}>Editar Perfil</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <View style={styles.button3}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          if (userInfo?.pdf) {
-                            Linking.openURL(userInfo?.pdf);
-                          } else {
-                            alert(
-                              "No tienes un entrenmiento personalizado aun. Por favor contacta a tu entrenador"
-                            );
-                          }
-                        }}
-                      >
-                        <Text style={{ fontSize: 13 }}>
-                          Mi Entrenamiento Personalizado
+                        <Text
+                          style={{
+                            color: "silver",
+                            marginTop: 5,
+                            fontWeight: "bold",
+                            textDecorationLine: "underline",
+                          }}
+                        >
+                          Agregar Nombre
                         </Text>
                       </TouchableOpacity>
-                    </View>
-                  </View>
-                  <Icon.Button
-                    name="qr-code"
-                    size={60}
-                    color="black"
-                    backgroundColor="transparent"
-                    onPress={() => {
-                      navigation.navigate("Qr");
-                    }}
-                  />
-                </View>
-              </AvatarView>
-            </Header>
-            <View style={styles.planDetails}>
-              {userInfo.endDate ? (
-                <Text style={styles.expire}>Plan hasta:</Text>
-              ) : (
-                <Text style={styles.expire}>Actualizar Plan</Text>
-              )}
-              <View style={{ flexDirection: "row" }}>
-                {!isNaN(dateDiff) && (
-                  <Text style={{ color: "grey", fontWeight: "bold" }}>
-                    {dateDiff < 0 ? "Hace " : "En "}
-                  </Text>
-                )}
-                <Text
-                  style={{
-                    color: isNaN(dateDiff)
-                      ? "orange"
-                      : dateDiff < 3
-                      ? "red"
-                      : "green",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {isNaN(dateDiff) ? "" : Math.abs(Math.round(dateDiff))}
+                    ) : (
+                      userName
+                    )
+                  ) : (
+                    userInfo.FirstName
+                  )}
                 </Text>
-                {!isNaN(dateDiff) && (
-                  <Text style={{ color: "grey", fontWeight: "bold" }}>
-                    {" "}
-                    Dias
-                  </Text>
-                )}
               </View>
-              <Text style={{ fontWeight: "bold" }}>
-                Puntos: {!userInfo.points ? "0" : userInfo.points}
-              </Text>
+              <View style={styles.planDetails}>
+                {userInfo.endDate ? (
+                  <Text style={styles.expire}>Plan hasta:</Text>
+                ) : (
+                  <Text style={styles.expire}>Actualizar Plan</Text>
+                )}
+                <View style={{ flexDirection: "row" }}>
+                  {!isNaN(dateDiff) && (
+                    <Text style={{ color: "grey", fontWeight: "bold" }}>
+                      {dateDiff < 0 ? "Hace " : "En "}
+                    </Text>
+                  )}
+                  <Text
+                    style={{
+                      color: isNaN(dateDiff)
+                        ? "orange"
+                        : dateDiff < 3
+                        ? "red"
+                        : "green",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {isNaN(dateDiff) ? "" : Math.abs(Math.round(dateDiff))}
+                  </Text>
+                  {!isNaN(dateDiff) && (
+                    <Text style={{ color: "grey", fontWeight: "bold" }}>
+                      {" "}
+                      Dias
+                    </Text>
+                  )}
+                </View>
+                <Text style={{ fontWeight: "bold" }}>
+                  Puntos: {!userInfo.points ? "0" : userInfo.points}
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -862,6 +921,39 @@ const ProfileScreen = ({ navigation }) => {
             )}
           </View>
         </ScrollView>
+        <ActionButton useNativeDriver={false} buttonColor={Colors.noExprimary}>
+          <ActionButton.Item
+            buttonColor="#9b59b6"
+            title="Editar Perfil"
+            onPress={() => navigation.navigate("Edit")}
+          >
+            <Icon name="create-outline" style={styles.actionButtonIcon} />
+          </ActionButton.Item>
+          <ActionButton.Item
+            buttonColor="#3498db"
+            title="Mi entrenamiento personalizado"
+            onPress={() => {
+              if (userInfo?.pdf) {
+                Linking.openURL(userInfo?.pdf);
+              } else {
+                alert(
+                  "No tienes un entrenmiento personalizado aun. Por favor contacta a tu entrenador"
+                );
+              }
+            }}
+          >
+            <Icon name="document-outline" style={styles.actionButtonIcon} />
+          </ActionButton.Item>
+          <ActionButton.Item
+            buttonColor="#1abc9c"
+            title="Iniciar sesion "
+            onPress={() => {
+              navigation.navigate("Qr");
+            }}
+          >
+            <Icon name="qr-code-outline" style={styles.actionButtonIcon} />
+          </ActionButton.Item>
+        </ActionButton>
         <Toast position="bottom" bottomOffset={20} />
       </SafeAreaView>
     </Container>
@@ -901,7 +993,6 @@ const styles = StyleSheet.create({
     marginTop: 5,
     width: 100,
     height: 20,
-    marginLeft: -5,
     backgroundColor: "#DDDDDD",
     borderRadius: 10,
     borderColor: "black",
@@ -919,7 +1010,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     // marginTop: -15,
     marginTop: 5,
-    paddingHorizontal: 5,
+    // paddingHorizontal: 5,
 
     width: 300,
     height: 20,
@@ -1021,9 +1112,9 @@ const styles = StyleSheet.create({
   },
 
   displayName: {
-    marginTop: 10,
+    // marginTop: 10,
     marginLeft: 10,
-    width: "100%",
+    // width: "90%",
     // justifyContent: "flex-start",
     // alignItems: "flex-start",
   },
@@ -1068,6 +1159,11 @@ const styles = StyleSheet.create({
     color: "silver",
     fontSize: 15,
   },
+  actionButtonIcon: {
+    fontSize: 20,
+    height: 22,
+    color: "white",
+  },
 });
 
 const Container = styled.View`
@@ -1081,10 +1177,10 @@ const Header = styled.View`
   background: #f2f2f2;
 `;
 const AvatarView = styled.View`
-  width: 150px;
+  width: 130px;
   height: 110px;
   border-radius: 75px;
-  position: absolute;
+  // position: absolute;
   flex-direction: row;
   /* top: 120px; */
   margin-top: 10px;
