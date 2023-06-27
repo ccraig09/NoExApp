@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useContext,
-  useCallback,
-  useReducer,
-  useEffect,
-} from "react";
+import React, { useState, useContext, useCallback, useEffect } from "react";
 import {
   StatusBar,
   Dimensions,
@@ -12,56 +6,29 @@ import {
   View,
   StyleSheet,
   ActivityIndicator,
-  TouchableWithoutFeedback,
-  Image,
-  TextInput,
   Platform,
-  KeyboardAvoidingView,
   TouchableOpacity,
   Text,
-  Picker,
   Alert,
   FlatList,
   SafeAreaView,
   RefreshControl,
 } from "react-native";
-// import Modal from "react-native-modal";
-// import AwesomeAlert from "react-native-awesome-alerts";
-// import { Formik } from "formik";
-// import * as yup from "yup";
 import { Ionicons } from "@expo/vector-icons";
 
 import styled, { useTheme } from "styled-components";
-// import { useSelector, useDispatch } from "react-redux";
 import { Avatar, Button } from "react-native-elements";
-// import HeaderButton from "../components/UI/HeaderButton";
 import EvalBlock from "../components/EvalBlock";
-// import Carousel from "../components/Carousel";
-// import Carousel from './Carousel';
 import * as Linking from "expo-linking";
 import Icon from "react-native-vector-icons/Ionicons";
 
-// import { AsyncStorage } from "react-native";
 import Colors from "../constants/Colors";
-// import * as detailsActions from "../store/actions/membersDetails";
-// import * as addEvalAction from "../store/actions/evals";
 import ImagePicker from "../components/ImagePicker";
-// import firebase from "../components/firebase";
-// import { SafeAreaView } from "react-native-safe-area-context";
-// import UpdateDT from "../components/UpdateTable";
 import { AuthContext } from "../navigation/AuthProvider";
 
-// import BaseEvalDT from "../components/BaseEvalDataTable";
-// import * as Description from "../components/UI/descriptions";
-// import ProgressWheel from "../components/UI/ProgressWheel";
-// import DataModal from "../components/DataModal";
 import BasicInfoScroll from "../components/BasicInfoScrollview";
-// import Forumula from "../components/Formula";
-// import DateTimePicker from "@react-native-community/datetimepicker";
 import Toast from "react-native-toast-message";
 
-// import moment from "moment";
-// import localization from "moment/locale/es-us";
 import SegmentBar from "../components/SegmentBar";
 import firebase from "../components/firebase";
 import DateTimePicker from "react-native-modal-datetime-picker";
@@ -71,8 +38,6 @@ import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 import ActionButton from "react-native-action-button";
-
-import { useFocusEffect } from "@react-navigation/native";
 
 let screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -107,85 +72,21 @@ const ProfileScreen = ({ navigation }) => {
   const [evalDateModal, setEvalDateModal] = useState(false);
   const [showProgreso, setShowProgreso] = useState(true);
   const [userName, setUserName] = useState();
-  const [extendedDate, setExtendedDate] = useState(false);
-  const [error, setError] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [transferred, setTransferred] = useState(0);
 
   const [showImagen, setShowImagen] = useState(true);
   const [userInfo, setUserInfo] = useState([]);
   const [userEvals, setUserEvals] = useState([]);
   const db = firebase.firestore().collection("Members");
 
-  const [showAll, setShowAll] = useState(true);
   const moment = extendMoment(Moment);
   var date1 = moment().startOf("day");
   var date2 = moment(userInfo.endDate, "DD-MM-YYYY");
 
   const dateDiff = moment.duration(date2.diff(date1)).asDays();
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const fetchMemberDetails = async () => {
-        try {
-          const list = [];
-          await firebase
-            .firestore()
-            .collection("Members")
-            .doc(user.uid)
-            .get()
-            .then((doc) => {
-              if (doc.exists) {
-                // console.log("Document data:", doc.data());
-                setUserInfo(doc.data());
-                console.log(">>>>checking user details", doc.data());
-              } else {
-                // doc.data() will be undefined in this case
-                console.log("No such document!");
-              }
-            });
-        } catch (e) {
-          console.log(e);
-        }
-      };
-      const fetchMemberEvals = async () => {
-        try {
-          const list = [];
-          await firebase
-            .firestore()
-            .collection("Members")
-            .doc(user.uid)
-            .collection("Member Evals")
-            .orderBy("title", "asc")
-            .get()
-            .then((querySnapshot) => {
-              querySnapshot.forEach((doc) => {
-                const { title, ownerId, timeStamp } = doc.data();
-                list.push({
-                  key: doc.id,
-                  title: title,
-                  ownerId: ownerId,
-                  timeStamp: timeStamp,
-                });
-              });
-            });
-          setUserEvals(list);
-        } catch (e) {
-          console.log(e);
-        }
-      };
-      registerForPushNotificationsAsync().then((token) => {
-        // setExpoPushToken(token);
-        console.log(token);
-        addToken(token);
-      });
-
-      fetchMemberDetails();
-      fetchMemberEvals();
-    }, [])
-  );
   const fetchMemberDetails = async () => {
     try {
+      console.log(">>>+++ fetchMemberDetails");
       const list = [];
       await firebase
         .firestore()
@@ -205,8 +106,10 @@ const ProfileScreen = ({ navigation }) => {
       console.log(e);
     }
   };
+
   const fetchMemberEvals = async () => {
     try {
+      console.log(">>>> fetching member evals");
       const list = [];
       await firebase
         .firestore()
@@ -229,8 +132,12 @@ const ProfileScreen = ({ navigation }) => {
       setUserEvals(list);
     } catch (e) {
       console.log(e);
+    } finally {
+      console.log(">> tryin ntfy");
+      registerForPushNotificationsAsync();
     }
   };
+
   async function registerForPushNotificationsAsync() {
     console.log("notifications ran");
     let token;
@@ -277,8 +184,30 @@ const ProfileScreen = ({ navigation }) => {
         lightColor: "#FF231F7C",
       });
     }
-    return token;
+    return addToken(token);
   }
+
+  // useEffect(() => {
+  //   async () => {
+  //     console.log("started");
+  //     registerForPushNotificationsAsync().then((token) => {
+  //       addToken(token);
+  //       console.log(">>>>>", token);
+  //     });
+  //   };
+  // }, []);
+
+  // useEffect(() => {
+  //   registerForPushNotificationsAsync();
+  // }, []);
+
+  useEffect(() => {
+    fetchMemberEvals();
+  }, []);
+
+  useEffect(() => {
+    fetchMemberDetails();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -947,9 +876,7 @@ const ProfileScreen = ({ navigation }) => {
           <ActionButton.Item
             buttonColor="#1abc9c"
             title="Iniciar sesion "
-            onPress={() => {
-              navigation.navigate("Qr");
-            }}
+            onPress={() => navigation.navigate("Qr")}
           >
             <Icon name="qr-code-outline" style={styles.actionButtonIcon} />
           </ActionButton.Item>
@@ -1171,6 +1098,7 @@ const Container = styled.View`
   background-color: #f2f2f2;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
+  margin-top: 20px;
 `;
 const Header = styled.View`
   height: 130px;

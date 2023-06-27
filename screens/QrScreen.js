@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { AuthContext } from "../navigation/AuthProvider";
@@ -11,7 +11,6 @@ const QrScreen = () => {
       <Text style={styles.caption}>Escanear codigo para iniciar sesion.</Text>
       <QRCode
         value={user?.uid}
-        logo={require("../assets/icon-noexlogo.png")}
         logoSize={50}
         logoBackgroundColor="transparent"
         size={250}
