@@ -7,6 +7,8 @@ import VideoControls from "./UI/VideoPlayer";
 import { Camera } from "expo-camera";
 import { MaterialIcons, Octicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
+import YoutubePlayer from "react-native-youtube-iframe";
+
 const { height, width } = Dimensions.get("window");
 
 import {
@@ -30,7 +32,6 @@ const VideoItem = (props) => {
   const [hasPermission, setHasPermission] = useState(null);
   const [currentVideo, setCurrentVideo] = useState(0);
   const [video, setVideo] = useState();
-  const [cameraRef, setCameraRef] = useState(null);
   const [showLottie, setShowLottie] = useState(false);
   const [shouldPlay, setShouldPlay] = useState(false);
   const [isCameraReady, setCameraReady] = useState(false);
@@ -47,6 +48,37 @@ const VideoItem = (props) => {
   const playbackInstance = useRef(null);
   let videoLink;
   const Playlist = props.video;
+
+  const playerRef = useRef();
+  const cameraRef = useRef();
+
+  const youtubeId = props.video.split("be/");
+
+  const onLoad = async () => {
+    // setRecording(true);
+    console.log("we live baby");
+
+    await cameraRef.current.recordAsync().then((file) => {
+      setVideo(file.uri);
+      videoLink = file.uri;
+      console.log("recording", file.uri);
+      // props.reviewNav(videoLink);
+    });
+    // try {
+    //   const videoRecordPromise = cameraRef.recordAsync();
+
+    //   if (videoRecordPromise) {
+    //     const data = await videoRecordPromise;
+    //     const source = data.uri;
+    //     if (source) {
+    //       console.log("video source", source);
+    //       videoLink = source;
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.warn(error);
+    // }
+  };
 
   useEffect(() => {
     return () => {
@@ -142,8 +174,8 @@ const VideoItem = (props) => {
     if (status.didJustFinish) {
       // if (recording) {
       // }
-      console.log("do we have a video?", video);
-      console.log("video recorded", video);
+      // console.log("do we have a video?", video);
+      // console.log("video recorded", video);
       onComplete();
       // forwardButton();
     } else {
@@ -153,62 +185,19 @@ const VideoItem = (props) => {
     }
   };
 
-  const onComplete = async () => {
+  const playbackHandler = (status) => {
+    if (status === "ended") {
+      onComplete();
+    }
+  };
+
+  const onComplete = () => {
     setShouldPlay(false);
     console.log("no more videos");
     setCompleted(true);
-    cameraRef.stopRecording();
     setRecording(false);
+    // cameraRef.current.stopRecording();
     props.reviewNav(videoLink);
-  };
-
-  // const forwardButton = async () => {
-  //   setShouldPlay(false);
-
-  //   if (currentVideo != Playlist.length - 1) {
-  //     setCurrentVideo(currentVideo + 1);
-  //   } else {
-  //     console.log("no more videos");
-  //     setCompleted(true);
-  //     cameraRef.stopRecording();
-  //     setRecording(false);
-  //     setCurrentVideo(0);
-  //   }
-  // };
-  // const backButton = () => {
-  //   // setRecording(false);
-  //   // cameraRef.stopRecording();
-  //   setShouldPlay(false);
-  //   if (currentVideo != 0) {
-  //     setCurrentVideo(currentVideo - 1);
-  //   } else {
-  //     setCurrentVideo(Playlist.length - 1);
-  //   }
-  // };
-
-  const onLoadStart = async () => {
-    console.log(`ON LOAD START`);
-    setIsLoading(true);
-  };
-
-  const onLoad = async (status) => {
-    console.log(`ON LOAD : ${JSON.stringify(status)}`);
-    if (status.isLoaded) {
-      setIsLoading(false);
-
-      setShowLottie(true);
-      setRecording(true);
-      console.log("we live baby");
-      await cameraRef.recordAsync().then((file) => {
-        if (completed) {
-          console.log("completed");
-        }
-        setVideo(file.uri);
-        videoLink = file.uri;
-        console.log("recording", file.uri);
-        // props.reviewNav(videoLink);
-      });
-    }
   };
 
   const onError = (error) => {
@@ -220,7 +209,17 @@ const VideoItem = (props) => {
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
         <Container>
-          <Video
+          <YoutubePlayer
+            ref={playerRef}
+            height={"100%"}
+            width={"100%"}
+            videoId={youtubeId[1]}
+            onChangeState={(state) => {
+              playbackHandler(state);
+              console.log(">>state", state);
+            }}
+          />
+          {/* <Video
             ref={playbackInstance}
             source={{
               uri: Playlist.url,
@@ -244,8 +243,8 @@ const VideoItem = (props) => {
               onError(error);
             }}
             style={{ width: "100%", height: "100%" }}
-          />
-          <View style={styles.controlsContainer}>
+          /> */}
+          {/* <View style={styles.controlsContainer}>
             <VideoControls
               state={playbackInstanceInfo.state}
               playbackInstance={playbackInstance.current}
@@ -253,7 +252,7 @@ const VideoItem = (props) => {
               setPlaybackInstanceInfo={setPlaybackInstanceInfo}
               togglePlay={togglePlay}
             />
-          </View>
+          </View> */}
           <CloseView>
             <View style={styles.iconWrapper}>
               <TouchableOpacity
@@ -350,9 +349,7 @@ const VideoItem = (props) => {
           <Camera
             style={{ flex: 1 }}
             type={type}
-            ref={(ref) => {
-              setCameraRef(ref);
-            }}
+            ref={cameraRef}
             onCameraReady={() => {
               setCameraReady;
             }}
@@ -441,9 +438,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   iconWrapper: {
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    backgroundColor: Colors.noExprimary,
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 5,
     height: 50,
     width: 50,
     borderRadius: 50,

@@ -9,11 +9,12 @@ const SectionScreen = ({ route, navigation }) => {
   const { classId, classes } = route.params;
   const data1 = classes.filter((item) => item.Caption === classId);
   // console.log("section", data[0].Levels);
-  const data = data1[0].Levels;
+  const data = data1[0]?.Levels;
   //   setLevel1(data);
+  console.log(">>data", data);
   return (
     <View style={styles.FlatList}>
-      <Text
+      {/* <Text
         style={{
           fontWeight: "bold",
           fontSize: 25,
@@ -22,7 +23,7 @@ const SectionScreen = ({ route, navigation }) => {
         }}
       >
         {classId}
-      </Text>
+      </Text> */}
       <FlatList
         // horizontal={true}
         showsHorizontalScrollIndicator={false}
@@ -30,7 +31,7 @@ const SectionScreen = ({ route, navigation }) => {
         keyExtractor={(item, index) => index.toString()}
         renderItem={(itemData) => (
           <CategoryItem
-            image={itemData.item.Image}
+            image={itemData.item.coverImg}
             title={itemData.item.Title}
             logo={itemData.item.logo}
             caption={itemData.item.Caption}
@@ -41,6 +42,8 @@ const SectionScreen = ({ route, navigation }) => {
             onClassClick={() => {
               navigation.navigate("Video", {
                 url: itemData.item.url,
+                classId: classId,
+                classes: classes,
               });
             }}
           />

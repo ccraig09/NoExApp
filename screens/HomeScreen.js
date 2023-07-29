@@ -191,66 +191,66 @@ const HomeScreen = ({ navigation }) => {
         } catch (e) {
           console.log(e);
         }
-        fetchMemberDetails();
+        // fetchMemberDetails();
       };
-      registerForPushNotificationsAsync().then((token) => {
-        // setExpoPushToken(token);
-        addToken(token);
-      });
+      // registerForPushNotificationsAsync().then((token) => {
+      //   // setExpoPushToken(token);
+      //   addToken(token);
+      // });
 
-      fetchNotifications();
+      // fetchNotifications();
       fetchClasses();
       // triggerPlanReminderNotification();
     }, [])
   );
 
-  async function registerForPushNotificationsAsync() {
-    let token;
-    if (Device.isDevice) {
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== "granted") {
-        Alert.alert(
-          "Alerta",
-          "No recibirá noticias si no habilita las notificaciones. Si desea recibir notificaciones, habilitelas desde configuración.",
-          [
-            { text: "Cancel" },
-            // If they said no initially and want to change their mind,
-            // we can automatically open our app in their settings
-            // so there's less friction in turning notifications on
-            {
-              text: "Activar Notificaciones",
-              onPress: () =>
-                Platform.OS === "ios"
-                  ? Linking.openURL("app-settings:")
-                  : Linking.openSettings(),
-            },
-          ]
-        );
-        return;
-      }
-      token = (await Notifications.getExpoPushTokenAsync()).data;
-      // console.log(token);
-    } else {
-      alert("Must use physical device for Push Notifications");
-      token = null;
-    }
+  // async function registerForPushNotificationsAsync() {
+  //   let token;
+  //   if (Device.isDevice) {
+  //     const { status: existingStatus } =
+  //       await Notifications.getPermissionsAsync();
+  //     let finalStatus = existingStatus;
+  //     if (existingStatus !== "granted") {
+  //       const { status } = await Notifications.requestPermissionsAsync();
+  //       finalStatus = status;
+  //     }
+  //     if (finalStatus !== "granted") {
+  //       Alert.alert(
+  //         "Alerta",
+  //         "No recibirá noticias si no habilita las notificaciones. Si desea recibir notificaciones, habilitelas desde configuración.",
+  //         [
+  //           { text: "Cancel" },
+  //           // If they said no initially and want to change their mind,
+  //           // we can automatically open our app in their settings
+  //           // so there's less friction in turning notifications on
+  //           {
+  //             text: "Activar Notificaciones",
+  //             onPress: () =>
+  //               Platform.OS === "ios"
+  //                 ? Linking.openURL("app-settings:")
+  //                 : Linking.openSettings(),
+  //           },
+  //         ]
+  //       );
+  //       return;
+  //     }
+  //     token = (await Notifications.getExpoPushTokenAsync()).data;
+  //     // console.log(token);
+  //   } else {
+  //     alert("Must use physical device for Push Notifications");
+  //     token = null;
+  //   }
 
-    if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-      });
-    }
-    return token;
-  }
+  //   if (Platform.OS === "android") {
+  //     Notifications.setNotificationChannelAsync("default", {
+  //       name: "default",
+  //       importance: Notifications.AndroidImportance.MAX,
+  //       vibrationPattern: [0, 250, 250, 250],
+  //       lightColor: "#FF231F7C",
+  //     });
+  //   }
+  //   return token;
+  // }
   // const triggerPlanReminderNotification = async () => {
   //   const date2 = moment(`${userInfo.endDate} 8:30`, "DD-MM-YYYY hh:mm");
   //   const date3 = moment(date2, "DD-MM-YYYY").subtract(2, "days");
@@ -285,234 +285,256 @@ const HomeScreen = ({ navigation }) => {
   //   // await Notifications.cancelScheduledNotificationAsync(cancelList);
   //   // console.log("checking all notes cancel", cancelList.length);
   // };
-  useEffect(() => {
-    (async () => {
-      const { status } = await requestTrackingPermissionsAsync();
-      if (status === "granted") {
-        console.log("Yay! I have user permission to track data");
-      }
-    })();
-    const backgroundSubscription =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        // console.log("background", response);
-        // navigation.navigate("Edit");
-      });
+  // useEffect(() => {
+  //   (async () => {
+  //     const { status } = await requestTrackingPermissionsAsync();
+  //     if (status === "granted") {
+  //       console.log("Yay! I have user permission to track data");
+  //     }
+  //   })();
+  //   const backgroundSubscription =
+  //     Notifications.addNotificationResponseReceivedListener((response) => {
+  //       // console.log("background", response);
+  //       // navigation.navigate("Edit");
+  //     });
 
-    const foregroundSubscription =
-      Notifications.addNotificationReceivedListener((notification) => {
-        console.log("foreground", notification);
-      });
-    return () => {
-      backgroundSubscription.remove();
-      foregroundSubscription.remove();
-    };
-  }, []);
+  //   const foregroundSubscription =
+  //     Notifications.addNotificationReceivedListener((notification) => {
+  //       console.log("foreground", notification);
+  //     });
+  //   return () => {
+  //     backgroundSubscription.remove();
+  //     foregroundSubscription.remove();
+  //   };
+  // }, []);
 
   return (
-    <SafeAreaView style={styles.Container}>
-      <View
-        style={{
-          maxWidth: width,
-          marginTop: 20,
-          flexDirection: "row",
-          // justifyContent: "space-between",
-          // paddingRight: 10,
-          paddingLeft: 20,
-        }}
-      >
-        <Avatar
-          rounded
-          size={90}
-          // {!userInfo.userImg ? (
-          icon={{ name: "user", type: "font-awesome" }}
-          // }
-          // style={{ padding: 0 }}
-          source={{ uri: `${userInfo?.userImg}` }}
-          onPress={() => {
-            if (!userInfo.userImg) {
-              navigation.navigate("Edit");
-            } else {
-              navigation.navigate("Profile");
-            }
-          }}
-        >
-          {!userInfo.userImg ? (
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate("Edit");
-              }}
-            >
-              <Avatar.Accessory
-                name="pencil-alt"
-                type="font-awesome-5"
-                size={25}
-              />
-            </TouchableOpacity>
-          ) : null}
-        </Avatar>
-
-        <View
-          style={{
-            paddingRight: 10,
-            flex: 1,
-            flexDirection: "row",
-            justifyContent: "space-between",
-          }}
-        >
-          <View style={styles.displayName}>
-            <Text style={styles.subtitle}>{greetingMessage}, </Text>
-            {/* <View style={{ flexDirection: "row" }}> */}
-            <Text style={styles.hello}>
-              {!userInfo.FirstName ? (
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate("Edit");
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "silver",
-                      marginTop: 5,
-                      fontWeight: "bold",
-                      textDecorationLine: "underline",
-                    }}
-                  >
-                    Agregar Nombre
-                  </Text>
-                </TouchableOpacity>
-              ) : (
-                userInfo.FirstName
-              )}
-            </Text>
-
-            {userInfo.endDate ? (
-              <Text style={styles.expire}>Plan hasta:</Text>
-            ) : (
-              <Text style={styles.expire}>Actualizar Plan</Text>
-            )}
-
-            <Text style={styles.expire}>
-              {userInfo.endDate ? userInfo.endDate : ""}
-            </Text>
-            <View style={{ flexDirection: "row" }}>
-              {!isNaN(dateDiff) && (
-                <Text style={{ color: "grey", fontWeight: "bold" }}>
-                  {dateDiff < 0 ? "Hace " : "En "}
-                </Text>
-              )}
-              <Text
-                style={{
-                  color: isNaN(dateDiff)
-                    ? "orange"
-                    : dateDiff < 3
-                    ? "red"
-                    : "green",
-                  fontWeight: "bold",
-                }}
-              >
-                {isNaN(dateDiff) ? "" : Math.abs(Math.round(dateDiff))}
-              </Text>
-              {!isNaN(dateDiff) && (
-                <Text style={{ color: "grey", fontWeight: "bold" }}> Dias</Text>
-              )}
-            </View>
-            <Text style={{ fontWeight: "bold" }}>
-              Puntos: {!userInfo.points ? "0" : userInfo.points}
-            </Text>
-          </View>
-          <View style={styles.qr}>
-            <Icon.Button
-              name="qr-code"
-              size={80}
-              color="black"
-              backgroundColor="#f0f3f5"
-              onPress={() => {
-                navigation.navigate("Qr");
-              }}
-            />
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate("Notification");
-              }}
-            >
-              <NotificationButton length={notificationList} />
-            </TouchableOpacity>
-            {/* </View>
-          <View style={{ alignItems: "flex-end" }}> */}
-          </View>
-          {/* </View> */}
-        </View>
-      </View>
-      <ScrollView>
-        <View style={styles.TitleBar}></View>
-        <Subtitle>{"Entrenamientos".toUpperCase()}</Subtitle>
-        <FlatList
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          data={fitnessClasses}
-          renderItem={(itemData) => (
-            <ClassItem
-              image={itemData.item.Image}
-              title={itemData.item.Title}
-              logo={itemData.item.logo}
-              caption={itemData.item.Caption}
-              subtitle={itemData.item.Subtitle}
-              onClassClick={() => {
-                navigation.navigate("Section", {
-                  classId: itemData.item.key,
-                  classes: fitnessClasses,
-                });
-              }}
-            />
-          )}
-        />
-        <Subtitle>{"Deportes".toUpperCase()}</Subtitle>
-        <FlatList
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          data={sportsClasses}
-          renderItem={(itemData) => (
-            <ClassItem
-              image={itemData.item.Image}
-              title={itemData.item.Title}
-              logo={itemData.item.logo}
-              caption={itemData.item.Caption}
-              subtitle={itemData.item.Subtitle}
-              onClassClick={() => {
-                navigation.navigate("Section", {
-                  classId: itemData.item.key,
-                  classes: sportsClasses,
-                });
-              }}
-            />
-          )}
-        />
-        <Subtitle>{"Niños".toUpperCase()}</Subtitle>
-        <FlatList
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          data={kidsClasses}
-          renderItem={(itemData) => (
-            <ClassItem
-              image={itemData.item.Image}
-              title={itemData.item.Title}
-              //   price={itemData.item.price}
-              logo={itemData.item.logo}
-              caption={itemData.item.Caption}
-              subtitle={itemData.item.Subtitle}
-              //   image={itemData.item.image}
-              onClassClick={() => {
-                navigation.navigate("Section", {
-                  classId: itemData.item.key,
-                  classes: kidsClasses,
-                });
-              }}
-            />
-          )}
-        />
-      </ScrollView>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Subtitle>{"Entrenamientos".toUpperCase()}</Subtitle>
+      <FlatList
+        // horizontal={true}
+        showsVerticalScrollIndicator={false}
+        data={fitnessClasses}
+        renderItem={(itemData) => (
+          <ClassItem
+            image={itemData.item.Image}
+            title={itemData.item.Title}
+            logo={itemData.item.logo}
+            caption={itemData.item.Caption}
+            subtitle={itemData.item.Subtitle}
+            onClassClick={() => {
+              navigation.navigate("Section", {
+                classId: itemData.item.key,
+                classes: fitnessClasses,
+              });
+            }}
+          />
+        )}
+      />
+    </View>
   );
+
+  //   <SafeAreaView style={styles.Container}>
+  //     <View
+  //       style={{
+  //         maxWidth: width,
+  //         marginTop: 20,
+  //         flexDirection: "row",
+  //         // justifyContent: "space-between",
+  //         // paddingRight: 10,
+  //         paddingLeft: 20,
+  //       }}
+  //     >
+  //       <Avatar
+  //         rounded
+  //         size={90}
+  //         // {!userInfo.userImg ? (
+  //         icon={{ name: "user", type: "font-awesome" }}
+  //         // }
+  //         // style={{ padding: 0 }}
+  //         source={{ uri: `${userInfo?.userImg}` }}
+  //         onPress={() => {
+  //           if (!userInfo.userImg) {
+  //             navigation.navigate("Edit");
+  //           } else {
+  //             navigation.navigate("Profile");
+  //           }
+  //         }}
+  //       >
+  //         {!userInfo.userImg ? (
+  //           <TouchableOpacity
+  //             onPress={() => {
+  //               navigation.navigate("Edit");
+  //             }}
+  //           >
+  //             <Avatar.Accessory
+  //               name="pencil-alt"
+  //               type="font-awesome-5"
+  //               size={25}
+  //             />
+  //           </TouchableOpacity>
+  //         ) : null}
+  //       </Avatar>
+
+  //       <View
+  //         style={{
+  //           paddingRight: 10,
+  //           flex: 1,
+  //           flexDirection: "row",
+  //           justifyContent: "space-between",
+  //         }}
+  //       >
+  //         <View style={styles.displayName}>
+  //           <Text style={styles.subtitle}>{greetingMessage}, </Text>
+  //           {/* <View style={{ flexDirection: "row" }}> */}
+  //           <Text style={styles.hello}>
+  //             {!userInfo.FirstName ? (
+  //               <TouchableOpacity
+  //                 onPress={() => {
+  //                   navigation.navigate("Edit");
+  //                 }}
+  //               >
+  //                 <Text
+  //                   style={{
+  //                     color: "silver",
+  //                     marginTop: 5,
+  //                     fontWeight: "bold",
+  //                     textDecorationLine: "underline",
+  //                   }}
+  //                 >
+  //                   Agregar Nombre
+  //                 </Text>
+  //               </TouchableOpacity>
+  //             ) : (
+  //               userInfo.FirstName
+  //             )}
+  //           </Text>
+
+  //           {userInfo.endDate ? (
+  //             <Text style={styles.expire}>Plan hasta:</Text>
+  //           ) : (
+  //             <Text style={styles.expire}>Actualizar Plan</Text>
+  //           )}
+
+  //           <Text style={styles.expire}>
+  //             {userInfo.endDate ? userInfo.endDate : ""}
+  //           </Text>
+  //           <View style={{ flexDirection: "row" }}>
+  //             {!isNaN(dateDiff) && (
+  //               <Text style={{ color: "grey", fontWeight: "bold" }}>
+  //                 {dateDiff < 0 ? "Hace " : "En "}
+  //               </Text>
+  //             )}
+  //             <Text
+  //               style={{
+  //                 color: isNaN(dateDiff)
+  //                   ? "orange"
+  //                   : dateDiff < 3
+  //                   ? "red"
+  //                   : "green",
+  //                 fontWeight: "bold",
+  //               }}
+  //             >
+  //               {isNaN(dateDiff) ? "" : Math.abs(Math.round(dateDiff))}
+  //             </Text>
+  //             {!isNaN(dateDiff) && (
+  //               <Text style={{ color: "grey", fontWeight: "bold" }}> Dias</Text>
+  //             )}
+  //           </View>
+  //           <Text style={{ fontWeight: "bold" }}>
+  //             Puntos: {!userInfo.points ? "0" : userInfo.points}
+  //           </Text>
+  //         </View>
+  //         <View style={styles.qr}>
+  //           <Icon.Button
+  //             name="qr-code"
+  //             size={80}
+  //             color="black"
+  //             backgroundColor="#f0f3f5"
+  //             onPress={() => {
+  //               navigation.navigate("Qr");
+  //             }}
+  //           />
+  //           <TouchableOpacity
+  //             onPress={() => {
+  //               navigation.navigate("Notification");
+  //             }}
+  //           >
+  //             <NotificationButton length={notificationList} />
+  //           </TouchableOpacity>
+  //           {/* </View>
+  //         <View style={{ alignItems: "flex-end" }}> */}
+  //         </View>
+  //         {/* </View> */}
+  //       </View>
+  //     </View>
+  //       <Subtitle>{"Entrenamientos".toUpperCase()}</Subtitle>
+  //       <FlatList
+  //         horizontal={true}
+  //         showsHorizontalScrollIndicator={false}
+  //         data={fitnessClasses}
+  //         renderItem={(itemData) => (
+  //           <ClassItem
+  //             image={itemData.item.Image}
+  //             title={itemData.item.Title}
+  //             logo={itemData.item.logo}
+  //             caption={itemData.item.Caption}
+  //             subtitle={itemData.item.Subtitle}
+  //             onClassClick={() => {
+  //               navigation.navigate("Section", {
+  //                 classId: itemData.item.key,
+  //                 classes: fitnessClasses,
+  //               });
+  //             }}
+  //           />
+  //         )}
+  //       />
+  //       {/* <Subtitle>{"Deportes".toUpperCase()}</Subtitle>
+  //       <FlatList
+  //         horizontal={true}
+  //         showsHorizontalScrollIndicator={false}
+  //         data={sportsClasses}
+  //         renderItem={(itemData) => (
+  //           <ClassItem
+  //             image={itemData.item.Image}
+  //             title={itemData.item.Title}
+  //             logo={itemData.item.logo}
+  //             caption={itemData.item.Caption}
+  //             subtitle={itemData.item.Subtitle}
+  //             onClassClick={() => {
+  //               navigation.navigate("Section", {
+  //                 classId: itemData.item.key,
+  //                 classes: sportsClasses,
+  //               });
+  //             }}
+  //           />
+  //         )}
+  //       />
+  //       <Subtitle>{"Niños".toUpperCase()}</Subtitle>
+  //       <FlatList
+  //         horizontal={true}
+  //         showsHorizontalScrollIndicator={false}
+  //         data={kidsClasses}
+  //         renderItem={(itemData) => (
+  //           <ClassItem
+  //             image={itemData.item.Image}
+  //             title={itemData.item.Title}
+  //             //   price={itemData.item.price}
+  //             logo={itemData.item.logo}
+  //             caption={itemData.item.Caption}
+  //             subtitle={itemData.item.Subtitle}
+  //             //   image={itemData.item.image}
+  //             onClassClick={() => {
+  //               navigation.navigate("Section", {
+  //                 classId: itemData.item.key,
+  //                 classes: kidsClasses,
+  //               });
+  //             }}
+  //           />
+  //         )}
+  //       /> */}
+  //   </SafeAreaView>
+  // );
 };
 
 const Subtitle = styled.Text`
@@ -563,6 +585,12 @@ const styles = StyleSheet.create({
   subtitle: {
     fontWeight: "bold",
     fontSize: 16,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 export default HomeScreen;

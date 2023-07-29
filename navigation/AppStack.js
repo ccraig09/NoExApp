@@ -61,17 +61,6 @@ const AppStack = () => {
       }}
       style={{ backgroundColor: "blue" }}
     >
-      {/* <Tab.Screen
-        name="Main"
-        component={HomeStack}
-        options={{
-          headerShown: false,
-          tabBarLabel: "Inicio",
-          tabBarIcon: ({ color }) => (
-            <Icon name="ios-home" color={color} size={30} />
-          ),
-        }}
-      /> */}
       <Tab.Screen
         name="ProfileTab"
         component={ProfileStackScreen}
@@ -80,6 +69,17 @@ const AppStack = () => {
           tabBarLabel: "Perfil",
           tabBarIcon: ({ color }) => (
             <Icon name="person" color={color} size={26} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Main"
+        component={HomeStack}
+        options={{
+          headerShown: false,
+          tabBarLabel: "Videos",
+          tabBarIcon: ({ color }) => (
+            <Icon name="videocam" color={color} size={30} />
           ),
         }}
       />
@@ -125,7 +125,7 @@ const HomeStack = () => (
       name="Home"
       component={HomeScreen}
       options={{
-        headerShown: false,
+        title: "Videos",
       }}
     />
     <Screen

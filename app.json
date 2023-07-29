@@ -2,7 +2,7 @@
   "expo": {
     "name": "NoExApp",
     "slug": "NoExApp",
-    "version": "3.2.0",
+    "version": "3.3.0",
     "orientation": "portrait",
     "icon": "./assets/appOldLogo.png",
     "userInterfaceStyle": "light",
@@ -49,7 +49,7 @@
       },
       "package": "com.ccraig09.NoExcusasFTC",
       "googleServicesFile": "./google-services.json",
-      "versionCode": 44,
+      "versionCode": 45,
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
@@ -64,6 +64,7 @@
         "projectId": "0b361a4d-8636-4592-8860-66a8bfc004d5"
       }
     },
+
     "runtimeVersion": {
       "policy": "sdkVersion"
     },

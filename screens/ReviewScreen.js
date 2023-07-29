@@ -6,8 +6,7 @@ import Colors from "../constants/Colors";
 import * as MediaLibrary from "expo-media-library";
 
 const ReviewScreen = ({ navigation, route }) => {
-  const { video } = route.params;
-  const { selectedVideo, classId, classes } = route.params;
+  const { selectedVideo, classId, classes, video } = route.params;
   console.log("what is this url review", selectedVideo);
   return (
     <View style={styles.container}>
@@ -15,7 +14,10 @@ const ReviewScreen = ({ navigation, route }) => {
         <CircleButton
           color={"#4D96FF"}
           onPress={() => {
-            navigation.navigate("Section");
+            navigation.navigate("Section", {
+              classId: classId,
+              classes: classes,
+            });
           }}
           icon={"list"}
           text={"Volver"}
@@ -42,7 +44,7 @@ const ReviewScreen = ({ navigation, route }) => {
         /> */}
       </View>
       {/* <View> */}
-      <Video
+      {/* <Video
         source={{
           uri: video,
         }}
@@ -64,9 +66,9 @@ const ReviewScreen = ({ navigation, route }) => {
         //   onError(error);
         // }}
         style={styles.videoBox}
-      />
+      /> */}
       {/* </View> */}
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.commandButton}
         onPress={() => {
           Alert.alert(`Guardar Video?`, ``, [
@@ -83,7 +85,7 @@ const ReviewScreen = ({ navigation, route }) => {
         }}
       >
         <Text style={styles.panelButtonTitle}>Guardar Video</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };

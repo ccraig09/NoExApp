@@ -21,28 +21,14 @@ const CategoryItem = (props) => {
     TouchableCmp = TouchableNativeFeedback;
   }
 
+  console.log(">>>propimg", props.image);
+
   return (
     <SafeAreaView>
       <View style={styles.product}>
         <View style={styles.touchable}>
           <TouchableCmp onPress={props.onClassClick} useForeground>
-            <View>
-              <View style={styles.imageContainer}>
-                <Image style={styles.image} source={{ uri: props.image }} />
-              </View>
-              {/* <View style={styles.details}> */}
-              {/* <Image style={styles.logo} source={require(logoimg)} /> */}
-              <View style={styles.wrapper}>
-                <View style={styles.levelWrapper}>
-                  <Text style={styles.subtitle}>{props.subtitle}</Text>
-                  <Text style={styles.caption}>Tiempo: {props.time}</Text>
-                </View>
-                <View style={styles.level}>
-                  <Text style={styles.difficulty}> - {props.difficulty}</Text>
-                </View>
-              </View>
-              {/* </View> */}
-            </View>
+            <Image style={styles.image} source={{ uri: props.image }} />
           </TouchableCmp>
         </View>
       </View>
@@ -81,16 +67,19 @@ const styles = StyleSheet.create({
     color: "yellow",
     fontSize: 30,
     fontWeight: "600",
+    fontFamily: "open-sans-bold",
     marginBottom: -5,
   },
   caption: {
     color: "#b8bece",
     fontWeight: "600",
     fontSize: 15,
+    fontFamily: "open-sans-bold",
     textTransform: "uppercase",
     // marginTop: 1,
   },
   title: {
+    fontFamily: "open-sans-bold",
     fontSize: 18,
     marginVertical: 2,
   },
@@ -110,11 +99,13 @@ const styles = StyleSheet.create({
     height: 50,
   },
   price: {
+    fontFamily: "open-sans",
     fontSize: 14,
     color: "#888",
   },
   difficulty: {
     color: "white",
+    fontFamily: "open-sans-bold",
     fontSize: 20,
   },
 
