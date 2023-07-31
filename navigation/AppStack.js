@@ -20,6 +20,7 @@ import VideoScreen from "../screens/VideoScreen";
 import ReviewScreen from "../screens/ReviewScreen";
 import NotificationScreen from "../screens/NotificationScreen";
 import AwardsScreen from "../screens/AwardsScreen";
+import MyTraining from "../screens/MyTraining";
 
 const { Navigator, Screen } = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -199,6 +200,15 @@ const ProfileStackScreen = ({ navigation }) => (
         headerShown: false,
       })}
     />
+    <Screen
+      name="MyTraining"
+      component={MyTraining}
+      options={({ navigation }) => ({
+        title: "",
+        headerShown: false,
+      })}
+    />
+
     <Screen
       name="Edit"
       component={EditProfileScreen}

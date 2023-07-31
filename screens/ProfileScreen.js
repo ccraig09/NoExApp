@@ -862,13 +862,14 @@ const ProfileScreen = ({ navigation }) => {
             buttonColor="#3498db"
             title="Mi entrenamiento personalizado"
             onPress={() => {
-              if (userInfo?.pdf) {
-                Linking.openURL(userInfo?.pdf);
-              } else {
-                alert(
-                  "No tienes un entrenmiento personalizado aun. Por favor contacta a tu entrenador"
-                );
-              }
+              navigation.navigate("MyTraining", { userInfo: userInfo });
+              // if (userInfo?.pdf) {
+              //   Linking.openURL(userInfo?.pdf);
+              // } else {
+              //   alert(
+              //     "No tienes un entrenmiento personalizado aun. Por favor contacta a tu entrenador"
+              //   );
+              // }
             }}
           >
             <Icon name="document-outline" style={styles.actionButtonIcon} />
