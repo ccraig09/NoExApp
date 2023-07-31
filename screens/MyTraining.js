@@ -3,17 +3,18 @@ import {
   Text,
   View,
   Image,
+  TouchableOpacity,
   SafeAreaView,
   Linking,
 } from "react-native";
 import React, { useState } from "react";
 import Colors from "../constants/Colors";
 import CustomButton from "../components/UI/CustomButton";
+import Icon from "react-native-vector-icons/Ionicons";
 
 import * as FileSystem from "expo-file-system";
-import Pdf from "react-native-pdf";
 
-const MyTraining = ({ route }) => {
+const MyTraining = ({ route, navigation }) => {
   const { userInfo } = route.params;
   const [pdfFile, setPdfFile] = useState(null);
   const [showPdf, setshowPdf] = useState(false);
@@ -21,16 +22,7 @@ const MyTraining = ({ route }) => {
   const whatsappUrl = "https://wa.me/message/3QK6FJJWOB7DP1";
 
   const onPressHandler = async () => {
-    const fileUri = `${FileSystem.documentDirectory}${"tempFile"}`;
-    const downloadedFile = await FileSystem.downloadAsync(
-      userInfo.pdf,
-      fileUri
-    );
-
-    setPdfFile(downloadedFile);
-    setshowPdf(true);
-
-    console.log(">>>uinfo", downloadedFile.uri);
+    navigation.navigate("WebView", { link: userInfo.pdf });
   };
 
   const onNewProgramPress = () => {
@@ -46,51 +38,33 @@ const MyTraining = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {showPdf ? (
-        <Pdf
-          source={pdfFile}
-          onLoadComplete={(numberOfPages, filePath) => {
-            console.log(`Number of pages: ${numberOfPages}`);
-          }}
-          onPageChanged={(page, numberOfPages) => {
-            console.log(`Current page: ${page}`);
-          }}
-          onError={(error) => {
-            console.log(error);
-          }}
-          onPressLink={(uri) => {
-            console.log(`Link pressed: ${uri}`);
-          }}
-          style={styles.pdf}
-        />
-      ) : (
-        <View>
-          <Image
-            style={styles.image}
-            source={require("../assets/kiki-circle.png")}
-          />
-          <Image
-            style={styles.imageSig}
-            source={require("../assets/sigPic.png")}
-          />
-          <Text style={styles.caption}>
-            Soy Kimberly {" \n "} tu entrenadora personal
-          </Text>
-          <CustomButton
-            btnText={"ACCEDER A UN NUEVO PROGRAMA DE ENTRENAMIENTO"}
-            onPress={onNewProgramPress}
-          />
-          <CustomButton
-            btnText={"MI PROGRAMA DE ENTRENAMIENTO"}
-            onPress={onPressHandler}
-          />
-          <CustomButton
-            btnText={"MI PLAN DE ALIMENTACION"}
-            onPress={onFoodPlanPress}
-          />
-          <CustomButton btnText={"CONTÁCTAME"} onPress={onContactPress} />
+      <Image
+        style={styles.image}
+        source={require("../assets/kiki-circle.png")}
+      />
+      <Image style={styles.imageSig} source={require("../assets/sigPic.png")} />
+      <Text style={styles.caption}>
+        Soy Kimberly {" \n "} tu entrenadora personal
+      </Text>
+      <CustomButton
+        btnText={"ACCEDER A UN NUEVO PROGRAMA DE ENTRENAMIENTO"}
+        onPress={onNewProgramPress}
+      />
+      <CustomButton
+        btnText={"MI PROGRAMA DE ENTRENAMIENTO"}
+        onPress={onPressHandler}
+      />
+      <CustomButton
+        btnText={"MI PLAN DE ALIMENTACION"}
+        onPress={onFoodPlanPress}
+      />
+      <CustomButton btnText={"CONTÁCTAME"} onPress={onContactPress} />
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <View style={styles.buttonRow}>
+          <Icon name={"chevron-back-circle-outline"} size={30} color="black" />
+          <Text style={styles.buttonText}>Volver</Text>
         </View>
-      )}
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -115,5 +89,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "800",
     textAlign: "center",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonText: {
+    fontSize: 20,
   },
 });

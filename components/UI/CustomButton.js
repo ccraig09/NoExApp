@@ -19,7 +19,7 @@ export default CustomButton;
 
 const styles = StyleSheet.create({
   button: {
-    width: "80%",
+    width: 340,
     height: 60,
     backgroundColor: Colors.primaryBtn,
     borderRadius: 18,

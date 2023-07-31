@@ -21,6 +21,7 @@ import ReviewScreen from "../screens/ReviewScreen";
 import NotificationScreen from "../screens/NotificationScreen";
 import AwardsScreen from "../screens/AwardsScreen";
 import MyTraining from "../screens/MyTraining";
+import WebViewScreen from "../screens/WebView";
 
 const { Navigator, Screen } = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -203,6 +204,14 @@ const ProfileStackScreen = ({ navigation }) => (
     <Screen
       name="MyTraining"
       component={MyTraining}
+      options={({ navigation }) => ({
+        title: "",
+        headerShown: false,
+      })}
+    />
+    <Screen
+      name="WebView"
+      component={WebViewScreen}
       options={({ navigation }) => ({
         title: "",
         headerShown: false,
