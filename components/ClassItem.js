@@ -40,43 +40,51 @@ const ClassItem = (props) => {
   return (
     <View style={styles.product}>
       <View style={styles.touchable}>
-        <TouchableCmp
-          onPress={() => {
-            touchHandler();
-          }}
-          useForeground
-        >
-          {/* <TouchableCmp onPress={props.onClassClick} useForeground> */}
-          <View>
-            <View style={styles.imageContainer}>
-              <Image style={styles.image} source={{ uri: props.image }} />
-              {/* <Text style={styles.cardTitle}>{props.title}</Text> */}
-            </View>
-            <View style={styles.details}>
-              <Image
-                style={styles.logo}
-                source={require("../assets/icon-noexlogo.png")}
-              />
-              <View style={styles.wrapper}>
-                <Text style={styles.caption}>{props.caption}</Text>
-                {/* <Text style={styles.caption}>Proximamente!</Text> */}
-                {/* <Text style={styles.subtitle}>{props.subtitle}</Text> */}
-                <Text style={styles.subtitle}>Proximamente!</Text>
-                {/* <Text style={styles.subtitle}>Estar atentos!</Text> */}
-              </View>
-            </View>
-          </View>
+        <TouchableCmp onPress={props.onClassClick} useForeground>
+          <Image style={styles.image} source={{ uri: props.image }} />
         </TouchableCmp>
       </View>
     </View>
+
+    // <View style={styles.product}>
+    //   <View style={styles.touchable}>
+    //     {/* <TouchableCmp
+    //       onPress={() => {
+    //         touchHandler();
+    //       }}
+    //       useForeground
+    //     > */}
+    //     <TouchableCmp onPress={props.onClassClick} useForeground>
+    //       <View>
+    //         <View style={styles.imageContainer}>
+    //           <Image style={styles.image} source={{ uri: props.image }} />
+    //           {/* <Text style={styles.cardTitle}>{props.title}</Text> */}
+    //         </View>
+    //         <View style={styles.details}>
+    //           <Image
+    //             style={styles.logo}
+    //             source={require("../assets/icon-noexlogo.png")}
+    //           />
+    //           <View style={styles.wrapper}>
+    //             <Text style={styles.caption}>{props.caption}</Text>
+    //             {/* <Text style={styles.caption}>Proximamente!</Text> */}
+    //             {/* <Text style={styles.subtitle}>{props.subtitle}</Text> */}
+    //             <Text style={styles.subtitle}>Proximamente!</Text>
+    //             {/* <Text style={styles.subtitle}>Estar atentos!</Text> */}
+    //           </View>
+    //         </View>
+    //       </View>
+    //     </TouchableCmp>
+    //   </View>
+    // </View>
   );
 };
 
 const styles = StyleSheet.create({
   product: {
-    width: 315,
-    height: 280,
-    shadowColor: "blue",
+    width: 350,
+    height: 300,
+    shadowColor: "black",
     shadowOpacity: 0.26,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
@@ -106,9 +114,9 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
-    position: "absolute",
-    top: 0,
-    left: 0,
+    // position: "absolute",
+    // top: 0,
+    // left: 0,
   },
   cardTitle: {
     color: Colors.noExprimary,
@@ -123,7 +131,6 @@ const styles = StyleSheet.create({
   caption: {
     fontSize: 20,
     color: "white",
-    fontFamily: "open-sans-bold",
     fontWeight: "600",
   },
   subtitle: {

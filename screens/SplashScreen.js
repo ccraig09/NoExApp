@@ -5,17 +5,18 @@ import {
   TouchableOpacity,
   Dimensions,
   StyleSheet,
-  StatusBar,
   Image,
   Alert,
 } from "react-native";
-import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../constants/Colors";
+import { useNavigation } from "@react-navigation/native";
 
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 
-const SplashScreen = ({ navigation }) => {
+const SplashScreen = () => {
+  const navigation = useNavigation();
+
   const startHandler = () => {
     Alert.alert(
       "Ya tienes una Cuenta?",
@@ -44,15 +45,13 @@ const SplashScreen = ({ navigation }) => {
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <Animatable.Image
-            animation="bounceIn"
-            duration={1500}
+          <Image
             source={require("../assets/icon-noexlogo.png")}
             style={styles.logo}
             resizeMode="stretch"
           />
         </View>
-        <Animatable.View style={styles.footer} animation="fadeInUpBig">
+        <View style={styles.footer}>
           <Text style={styles.title}>Si no es ahora, entonces cuando?</Text>
           <Text style={styles.text}>Iniciar Sesion o crear una cuenta</Text>
           <View style={styles.button}>
@@ -64,7 +63,7 @@ const SplashScreen = ({ navigation }) => {
               <MaterialIcons name="navigate-next" color="#fff" size={20} />
             </TouchableOpacity>
           </View>
-        </Animatable.View>
+        </View>
       </View>
     </LinearGradient>
   );

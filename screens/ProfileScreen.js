@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useContext,
-  useCallback,
-  useReducer,
-  useEffect,
-} from "react";
+import React, { useState, useContext, useCallback, useEffect } from "react";
 import {
   StatusBar,
   Dimensions,
@@ -12,62 +6,38 @@ import {
   View,
   StyleSheet,
   ActivityIndicator,
-  TouchableWithoutFeedback,
-  Image,
-  TextInput,
   Platform,
-  KeyboardAvoidingView,
   TouchableOpacity,
   Text,
-  Picker,
   Alert,
   FlatList,
   SafeAreaView,
   RefreshControl,
 } from "react-native";
-// import Modal from "react-native-modal";
-// import AwesomeAlert from "react-native-awesome-alerts";
-// import { Formik } from "formik";
-// import * as yup from "yup";
 import { Ionicons } from "@expo/vector-icons";
 
 import styled, { useTheme } from "styled-components";
-// import { useSelector, useDispatch } from "react-redux";
 import { Avatar, Button } from "react-native-elements";
-// import HeaderButton from "../components/UI/HeaderButton";
 import EvalBlock from "../components/EvalBlock";
-// import Carousel from "../components/Carousel";
-// import Carousel from './Carousel';
 import * as Linking from "expo-linking";
+import Icon from "react-native-vector-icons/Ionicons";
 
-// import { AsyncStorage } from "react-native";
 import Colors from "../constants/Colors";
-// import * as detailsActions from "../store/actions/membersDetails";
-// import * as addEvalAction from "../store/actions/evals";
 import ImagePicker from "../components/ImagePicker";
-// import firebase from "../components/firebase";
-// import { SafeAreaView } from "react-native-safe-area-context";
-// import UpdateDT from "../components/UpdateTable";
 import { AuthContext } from "../navigation/AuthProvider";
 
-// import BaseEvalDT from "../components/BaseEvalDataTable";
-// import * as Description from "../components/UI/descriptions";
-// import ProgressWheel from "../components/UI/ProgressWheel";
-// import DataModal from "../components/DataModal";
 import BasicInfoScroll from "../components/BasicInfoScrollview";
-// import Forumula from "../components/Formula";
-// import DateTimePicker from "@react-native-community/datetimepicker";
 import Toast from "react-native-toast-message";
 
-// import moment from "moment";
-// import localization from "moment/locale/es-us";
 import SegmentBar from "../components/SegmentBar";
 import firebase from "../components/firebase";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import Moment from "moment";
 import { extendMoment } from "moment-range";
-
-import { useFocusEffect } from "@react-navigation/native";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
+import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
+import ActionButton from "react-native-action-button";
 
 let screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -84,8 +54,17 @@ const greetingMessage =
     ? "Buenas Noches" // if for some reason the calculation didn't work
     : "Bienvenido";
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => {
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+    };
+  },
+});
+
 const ProfileScreen = ({ navigation }) => {
-  const { user, newEval, deleteEval } = useContext(AuthContext);
+  const { user, newEval, deleteEval, addToken } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showEval, setShowEval] = useState(true);
@@ -93,75 +72,21 @@ const ProfileScreen = ({ navigation }) => {
   const [evalDateModal, setEvalDateModal] = useState(false);
   const [showProgreso, setShowProgreso] = useState(true);
   const [userName, setUserName] = useState();
-  const [extendedDate, setExtendedDate] = useState(false);
-  const [error, setError] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [transferred, setTransferred] = useState(0);
 
   const [showImagen, setShowImagen] = useState(true);
   const [userInfo, setUserInfo] = useState([]);
   const [userEvals, setUserEvals] = useState([]);
   const db = firebase.firestore().collection("Members");
 
-  const [showAll, setShowAll] = useState(true);
   const moment = extendMoment(Moment);
+  var date1 = moment().startOf("day");
+  var date2 = moment(userInfo.endDate, "DD-MM-YYYY");
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const fetchMemberDetails = async () => {
-        try {
-          const list = [];
-          await firebase
-            .firestore()
-            .collection("Members")
-            .doc(user.uid)
-            .get()
-            .then((doc) => {
-              if (doc.exists) {
-                // console.log("Document data:", doc.data());
-                setUserInfo(doc.data());
-              } else {
-                // doc.data() will be undefined in this case
-                console.log("No such document!");
-              }
-            });
-        } catch (e) {
-          console.log(e);
-        }
-      };
-      const fetchMemberEvals = async () => {
-        try {
-          const list = [];
-          await firebase
-            .firestore()
-            .collection("Members")
-            .doc(user.uid)
-            .collection("Member Evals")
-            .orderBy("title", "asc")
-            .get()
-            .then((querySnapshot) => {
-              querySnapshot.forEach((doc) => {
-                const { title, ownerId, timeStamp } = doc.data();
-                list.push({
-                  key: doc.id,
-                  title: title,
-                  ownerId: ownerId,
-                  timeStamp: timeStamp,
-                });
-              });
-            });
-          setUserEvals(list);
-        } catch (e) {
-          console.log(e);
-        }
-      };
+  const dateDiff = moment.duration(date2.diff(date1)).asDays();
 
-      fetchMemberDetails();
-      fetchMemberEvals();
-    }, [])
-  );
   const fetchMemberDetails = async () => {
     try {
+      console.log(">>>+++ fetchMemberDetails");
       const list = [];
       await firebase
         .firestore()
@@ -181,8 +106,10 @@ const ProfileScreen = ({ navigation }) => {
       console.log(e);
     }
   };
+
   const fetchMemberEvals = async () => {
     try {
+      console.log(">>>> fetching member evals");
       const list = [];
       await firebase
         .firestore()
@@ -205,8 +132,105 @@ const ProfileScreen = ({ navigation }) => {
       setUserEvals(list);
     } catch (e) {
       console.log(e);
+    } finally {
+      console.log(">> tryin ntfy");
+      registerForPushNotificationsAsync();
     }
   };
+
+  async function registerForPushNotificationsAsync() {
+    console.log("notifications ran");
+    let token;
+    if (Device.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        Alert.alert(
+          "Alerta",
+          "No recibirá noticias si no habilita las notificaciones. Si desea recibir notificaciones, habilitelas desde configuración.",
+          [
+            { text: "Cancel" },
+            // If they said no initially and want to change their mind,
+            // we can automatically open our app in their settings
+            // so there's less friction in turning notifications on
+            {
+              text: "Activar Notificaciones",
+              onPress: () =>
+                Platform.OS === "ios"
+                  ? Linking.openURL("app-settings:")
+                  : Linking.openSettings(),
+            },
+          ]
+        );
+        return;
+      }
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+      // console.log(token);
+    } else {
+      alert("Must use physical device for Push Notifications");
+      token = null;
+    }
+
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+    return addToken(token);
+  }
+
+  // useEffect(() => {
+  //   async () => {
+  //     console.log("started");
+  //     registerForPushNotificationsAsync().then((token) => {
+  //       addToken(token);
+  //       console.log(">>>>>", token);
+  //     });
+  //   };
+  // }, []);
+
+  // useEffect(() => {
+  //   registerForPushNotificationsAsync();
+  // }, []);
+
+  useEffect(() => {
+    fetchMemberEvals();
+  }, []);
+
+  useEffect(() => {
+    fetchMemberDetails();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await requestTrackingPermissionsAsync();
+      if (status === "granted") {
+        console.log("Yay! I have user permission to track data");
+      }
+    })();
+    const backgroundSubscription =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        // console.log("background", response);
+        // navigation.navigate("Edit");
+      });
+
+    const foregroundSubscription =
+      Notifications.addNotificationReceivedListener((notification) => {
+        console.log("foreground", notification);
+      });
+    return () => {
+      backgroundSubscription.remove();
+      foregroundSubscription.remove();
+    };
+  }, []);
 
   const frontImageTakenHandler = useCallback(async (uri) => {
     p;
@@ -373,81 +397,90 @@ const ProfileScreen = ({ navigation }) => {
             />
           }
         >
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("Edit", {
-                // avatar: userPhoto,
-                // name: firstName,
-              })
-            }
-          >
-            <Header>
-              <AvatarView>
-                <Avatar
-                  rounded
-                  size="xlarge"
-                  style={{ width: 100, height: 100 }}
-                  source={{ uri: `${userInfo.userImg}` }}
-                  showEditButton={true}
-                />
-                <View style={styles.displayName}>
-                  <Text style={styles.hello}>{greetingMessage}, </Text>
-                  <Text style={styles.name}>
-                    {!userInfo.FirstName ? (
-                      userName === "" ? (
-                        <TouchableOpacity
-                          onPress={() => {
-                            navigation.navigate("Edit");
+          <View style={{ flexDirection: "row" }}>
+            <View>
+              <Avatar
+                rounded
+                size="xlarge"
+                style={{ width: 90, height: 90, marginLeft: 10 }}
+                source={{ uri: `${userInfo.userImg}` }}
+                // showEditButton={true}
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                // justifyContent: "space-around",
+                paddingHorizontal: 10,
+                // width: 200,
+              }}
+            >
+              <View style={styles.displayName}>
+                <Text style={styles.hello}>{greetingMessage}, </Text>
+                <Text style={styles.name}>
+                  {!userInfo.FirstName ? (
+                    userName === "" ? (
+                      <TouchableOpacity
+                        onPress={() => {
+                          navigation.navigate("Edit");
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: "silver",
+                            marginTop: 5,
+                            fontWeight: "bold",
+                            textDecorationLine: "underline",
                           }}
                         >
-                          <Text
-                            style={{
-                              color: "silver",
-                              marginTop: 5,
-                              fontWeight: "bold",
-                              textDecorationLine: "underline",
-                            }}
-                          >
-                            Agregar Nombre
-                          </Text>
-                        </TouchableOpacity>
-                      ) : (
-                        userName
-                      )
+                          Agregar Nombre
+                        </Text>
+                      </TouchableOpacity>
                     ) : (
-                      userInfo.FirstName
-                    )}
+                      userName
+                    )
+                  ) : (
+                    userInfo.FirstName
+                  )}
+                </Text>
+              </View>
+              <View style={styles.planDetails}>
+                {userInfo.endDate ? (
+                  <Text style={styles.expire}>Plan hasta:</Text>
+                ) : (
+                  <Text style={styles.expire}>Actualizar Plan</Text>
+                )}
+                <View style={{ flexDirection: "row" }}>
+                  {!isNaN(dateDiff) && (
+                    <Text style={{ color: "grey", fontWeight: "bold" }}>
+                      {dateDiff < 0 ? "Hace " : "En "}
+                    </Text>
+                  )}
+                  <Text
+                    style={{
+                      color: isNaN(dateDiff)
+                        ? "orange"
+                        : dateDiff < 3
+                        ? "red"
+                        : "green",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {isNaN(dateDiff) ? "" : Math.abs(Math.round(dateDiff))}
                   </Text>
-                  <View style={styles.button2}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        navigation.navigate("Edit");
-                      }}
-                    >
-                      <Text style={{ fontSize: 13 }}>Editar Perfil</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.button3}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        if (userInfo?.pdf) {
-                          Linking.openURL(userInfo?.pdf);
-                        } else {
-                          alert(
-                            "No tienes un entrenmiento personalizado aun. Por favor contacta a tu entrenador"
-                          );
-                        }
-                      }}
-                    >
-                      <Text style={{ fontSize: 13 }}>
-                        Mi Entrenamiento Personalizado
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                  {!isNaN(dateDiff) && (
+                    <Text style={{ color: "grey", fontWeight: "bold" }}>
+                      {" "}
+                      Dias
+                    </Text>
+                  )}
                 </View>
-              </AvatarView>
-            </Header>
-          </TouchableOpacity>
+                <Text style={{ fontWeight: "bold" }}>
+                  Puntos: {!userInfo.points ? "0" : userInfo.points}
+                </Text>
+              </View>
+            </View>
+          </View>
 
           <View style={styles.edit}>
             <TouchableOpacity
@@ -817,6 +850,38 @@ const ProfileScreen = ({ navigation }) => {
             )}
           </View>
         </ScrollView>
+        <ActionButton useNativeDriver={false} buttonColor={Colors.noExprimary}>
+          <ActionButton.Item
+            buttonColor="#9b59b6"
+            title="Editar Perfil"
+            onPress={() => navigation.navigate("Edit")}
+          >
+            <Icon name="create-outline" style={styles.actionButtonIcon} />
+          </ActionButton.Item>
+          <ActionButton.Item
+            buttonColor="#3498db"
+            title="Mi entrenamiento personalizado"
+            onPress={() => {
+              navigation.navigate("MyTraining", { userInfo: userInfo });
+              // if (userInfo?.pdf) {
+              //   Linking.openURL(userInfo?.pdf);
+              // } else {
+              //   alert(
+              //     "No tienes un entrenmiento personalizado aun. Por favor contacta a tu entrenador"
+              //   );
+              // }
+            }}
+          >
+            <Icon name="document-outline" style={styles.actionButtonIcon} />
+          </ActionButton.Item>
+          <ActionButton.Item
+            buttonColor="#1abc9c"
+            title="Iniciar sesion "
+            onPress={() => navigation.navigate("Qr")}
+          >
+            <Icon name="qr-code-outline" style={styles.actionButtonIcon} />
+          </ActionButton.Item>
+        </ActionButton>
         <Toast position="bottom" bottomOffset={20} />
       </SafeAreaView>
     </Container>
@@ -856,7 +921,6 @@ const styles = StyleSheet.create({
     marginTop: 5,
     width: 100,
     height: 20,
-    marginLeft: -5,
     backgroundColor: "#DDDDDD",
     borderRadius: 10,
     borderColor: "black",
@@ -874,7 +938,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     // marginTop: -15,
     marginTop: 5,
-    paddingHorizontal: 5,
+    // paddingHorizontal: 5,
 
     width: 300,
     height: 20,
@@ -973,13 +1037,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 25,
     color: "#6C6C6C",
-    fontFamily: "open-sans-bold",
   },
 
   displayName: {
-    marginTop: 10,
+    // marginTop: 10,
     marginLeft: 10,
-    width: "100%",
+    // width: "90%",
     // justifyContent: "flex-start",
     // alignItems: "flex-start",
   },
@@ -993,6 +1056,9 @@ const styles = StyleSheet.create({
   },
   screen: {
     flex: 1,
+  },
+  planDetails: {
+    paddingLeft: 20,
   },
   picker: {
     marginBottom: 80,
@@ -1016,6 +1082,16 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 20,
   },
+  expire: {
+    fontWeight: "bold",
+    color: "silver",
+    fontSize: 15,
+  },
+  actionButtonIcon: {
+    fontSize: 20,
+    height: 22,
+    color: "white",
+  },
 });
 
 const Container = styled.View`
@@ -1023,16 +1099,17 @@ const Container = styled.View`
   background-color: #f2f2f2;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
+  margin-top: 20px;
 `;
 const Header = styled.View`
   height: 130px;
   background: #f2f2f2;
 `;
 const AvatarView = styled.View`
-  width: 150px;
+  width: 130px;
   height: 110px;
   border-radius: 75px;
-  position: absolute;
+  // position: absolute;
   flex-direction: row;
   /* top: 120px; */
   margin-top: 10px;

@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "734413363397",
+    "firebase_url": "https://no-excusas.firebaseio.com",
+    "project_id": "no-excusas",
+    "storage_bucket": "no-excusas.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:734413363397:android:1277c753a7c59ac22df8ac",
+        "android_client_info": {
+          "package_name": "com.ccraig09.NoExcusasFTC"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4Mt1GvDxyyp5evrih4X4LtCVFYN5Hey4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "734413363397-2p3pcf87ibhcnli6b4mtnqrbg3ntug9n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "734413363397-09tc9c3u9hbphboovjqjs3ab25d1btk7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.facebook.REACT.NoExcusasRN-tvOS"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

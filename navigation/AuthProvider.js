@@ -7,8 +7,6 @@ import {
   createUserWithEmailAndPassword,
 } from "firebase/auth";
 
-// import * as Google from "expo-google-app-auth";
-// import * as Facebook from "expo-facebook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const AuthContext = createContext();

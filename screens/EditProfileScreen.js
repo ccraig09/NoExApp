@@ -138,7 +138,7 @@ const EditProfileScreen = ({ navigation }) => {
     });
     console.log(result);
 
-    if (!result.cancelled) {
+    if (!result.canceled) {
       setImage(result.uri);
       actionSheetRef.current?.hide();
     }
@@ -154,7 +154,7 @@ const EditProfileScreen = ({ navigation }) => {
     });
     console.log(result);
 
-    if (!result.cancelled) {
+    if (!result.canceled) {
       setImage(result.uri);
       actionSheetRef.current?.hide();
     }
@@ -255,7 +255,7 @@ const EditProfileScreen = ({ navigation }) => {
       <View style={{ alignItems: "center" }}>
         <TouchableOpacity
           onPress={() => {
-            actionSheetRef.current?.setModalVisible();
+            actionSheetRef.current?.show();
           }}
         >
           <View

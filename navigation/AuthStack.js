@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View } from "react-native";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SplashScreen from "../screens/SplashScreen";
 import SignupScreen from "../screens/SignupScreen";
 import LoginScreen from "../screens/LoginScreen";
@@ -9,20 +9,13 @@ import OnboardingScreen from "../screens/OnboardingScreen";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const Stack = createStackNavigator();
+const { Navigator, Screen } = createNativeStackNavigator();
 
 const AuthStack = () => {
   return (
-    <Stack.Navigator initialRouteName="Splash">
-      <Stack.Screen
-        name="Splash"
-        component={SplashScreen}
-        options={({ navigation }) => ({
-          title: "",
-          headerShown: false,
-        })}
-      />
-      <Stack.Screen
+    <Navigator screenOptions={{ headerShown: false }} initialRouteName="Splash">
+      <Screen name="Splash" component={SplashScreen} />
+      <Screen
         name="Login"
         component={LoginScreen}
         options={({ navigation }) => ({
@@ -46,12 +39,12 @@ const AuthStack = () => {
           ),
         })}
       />
-      <Stack.Screen
+      <Screen
         name="Signup"
         component={SignupScreen}
         options={{ header: () => null }}
       />
-      <Stack.Screen
+      <Screen
         name="Forgot"
         component={ForgotPasswordScreen}
         options={({ navigation }) => ({
@@ -74,7 +67,7 @@ const AuthStack = () => {
           ),
         })}
       />
-    </Stack.Navigator>
+    </Navigator>
   );
 };
 

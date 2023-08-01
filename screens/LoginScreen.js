@@ -15,17 +15,9 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../constants/Colors";
-// import Input from "../components/UI/Input";
-// import Card from "../components/UI/Card";
 import validator from "validator";
-// import { Input } from "react-native-elements";
-import * as Animatable from "react-native-animatable";
 
-// import FormInput from "../components/FormInput";
-// import FormButton from "../components/FormButton";
-// import SocialButton from "../components/SocialButton";
 import { AuthContext } from "../navigation/AuthProvider";
-// import * as Google from "expo-google-app-auth";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Feather from "react-native-vector-icons/Feather";
 
@@ -119,7 +111,7 @@ const LoginScreen = ({ navigation }) => {
         <View style={styles.header}>
           <Text style={styles.text_header}>Bienvenido!</Text>
         </View>
-        <Animatable.View animation="fadeInUpBig" style={styles.footer}>
+        <View style={styles.footer}>
           <ScrollView showsVerticalScrollIndicator={false}>
             <Text style={styles.text_footer}>Correo</Text>
             <View style={styles.action}>
@@ -136,17 +128,17 @@ const LoginScreen = ({ navigation }) => {
                 onEndEditing={(e) => handleValidUser(e.nativeEvent.text)}
               />
               {check_textInputChange ? (
-                <Animatable.View animation="bounceIn">
+                <View>
                   <Feather name="check-circle" color="green" size={20} />
-                </Animatable.View>
+                </View>
               ) : null}
             </View>
             {isValidUser ? null : (
-              <Animatable.View animation="fadeInLeft" duration={500}>
+              <View duration={500}>
                 <Text style={styles.errorMsg}>
                   Por Favor usar un correo electronico valido
                 </Text>
-              </Animatable.View>
+              </View>
             )}
             <Text style={[styles.text_footer, { marginTop: 35 }]}>
               Contraseña
@@ -171,11 +163,11 @@ const LoginScreen = ({ navigation }) => {
               </TouchableOpacity>
             </View>
             {isValidPassword ? null : (
-              <Animatable.View animation="fadeInLeft" duration={500}>
+              <View duration={500}>
                 <Text style={styles.errorMsg}>
                   La contranseña debe ser minimo 8 caracteres
                 </Text>
-              </Animatable.View>
+              </View>
             )}
 
             <View style={styles.button}>
@@ -239,7 +231,7 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.navButtonText}>Olvidé mi contranseña</Text>
             </TouchableOpacity>
           </ScrollView>
-        </Animatable.View>
+        </View>
       </View>
     </LinearGradient>
     // <LinearGradient
@@ -533,7 +525,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   text: {
-    fontFamily: "Kufam-SemiBoldItalic",
     fontSize: 28,
     marginBottom: 10,
     color: "#051d5f",
@@ -549,7 +540,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "500",
     color: "#2e64e5",
-    fontFamily: "Lato-Regular",
   },
 
   ////////
