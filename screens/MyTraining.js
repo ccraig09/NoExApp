@@ -22,14 +22,22 @@ const MyTraining = ({ route, navigation }) => {
   const whatsappUrl = "https://wa.me/message/3QK6FJJWOB7DP1";
 
   const onPressHandler = async () => {
-    navigation.navigate("WebView", { link: userInfo.pdf });
+    userInfo.pdf
+      ? navigation.navigate("WebView", { link: userInfo.pdf })
+      : alert(
+          "No tienes un entrenmiento personalizado aun. Por favor contacta a tu entrenador"
+        );
   };
 
   const onNewProgramPress = () => {
     alert("Proximamente");
   };
   const onFoodPlanPress = () => {
-    alert("Proximamente");
+    userInfo.diet
+      ? navigation.navigate("WebView", { link: userInfo.diet })
+      : alert(
+          "No tienes un plan de alimentacion aun. Por favor contacta a tu entrenador"
+        );
   };
 
   const onContactPress = () => {
