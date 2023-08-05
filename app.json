@@ -2,7 +2,7 @@
   "expo": {
     "name": "NoExApp",
     "slug": "NoExApp",
-    "version": "3.4.0",
+    "version": "3.5.0",
     "orientation": "portrait",
     "icon": "./assets/appOldLogo.png",
     "userInterfaceStyle": "light",
@@ -49,7 +49,7 @@
       },
       "package": "com.ccraig09.NoExcusasFTC",
       "googleServicesFile": "./google-services.json",
-      "versionCode": 46,
+      "versionCode": 47,
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
@@ -63,13 +63,13 @@
       "eas": {
         "projectId": "0b361a4d-8636-4592-8860-66a8bfc004d5"
       }
-    }
+    },
 
-    // "runtimeVersion": {
-    //   "policy": "sdkVersion"
-    // },
-    // "updates": {
-    //   "url": "https://u.expo.dev/0b361a4d-8636-4592-8860-66a8bfc004d5"
-    // }
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0b361a4d-8636-4592-8860-66a8bfc004d5"
+    }
   }
 }

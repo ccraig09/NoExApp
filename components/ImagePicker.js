@@ -80,10 +80,10 @@ const ImgPicker = (props) => {
       quality: 0.7,
     });
     console.log(result);
+    actionSheetRef.current?.hide();
 
     if (!result.canceled) {
       props.onImageTaken(result.uri);
-      actionSheetRef.current?.hide();
     }
   };
 
@@ -104,17 +104,18 @@ const ImgPicker = (props) => {
 
   const choosePhotoFromLibrary = async () => {
     console.log("opening gallery");
+
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.7,
     });
-    console.log(result);
+    console.log(">>selected photo", result.assets[0].uri);
+    actionSheetRef.current?.hide();
 
     if (!result.canceled) {
-      props.onImageTaken(result.uri);
-      actionSheetRef.current?.hide();
+      props.onImageTaken(result.assets[0].uri);
     }
   };
 

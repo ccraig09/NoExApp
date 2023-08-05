@@ -38,7 +38,13 @@ import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 import ActionButton from "react-native-action-button";
-
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
 let screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 StatusBar.setHidden(true);
@@ -64,7 +70,8 @@ Notifications.setNotificationHandler({
 });
 
 const ProfileScreen = ({ navigation }) => {
-  const { user, newEval, deleteEval, addToken } = useContext(AuthContext);
+  const { user, newEval, deleteEval, addToken, addImage } =
+    useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showEval, setShowEval] = useState(true);
@@ -72,11 +79,15 @@ const ProfileScreen = ({ navigation }) => {
   const [evalDateModal, setEvalDateModal] = useState(false);
   const [showProgreso, setShowProgreso] = useState(true);
   const [userName, setUserName] = useState();
-
+  const [uploading, setUploading] = useState(false);
+  const [transferred, setTransferred] = useState(0);
   const [showImagen, setShowImagen] = useState(true);
   const [userInfo, setUserInfo] = useState([]);
   const [userEvals, setUserEvals] = useState([]);
+  const [image, setImage] = useState(null);
+  const [sideImage, setSideImage] = useState(null);
   const db = firebase.firestore().collection("Members");
+  const storage = getStorage();
 
   const moment = extendMoment(Moment);
   var date1 = moment().startOf("day");
@@ -232,114 +243,77 @@ const ProfileScreen = ({ navigation }) => {
     };
   }, []);
 
-  const frontImageTakenHandler = useCallback(async (uri) => {
-    p;
+  const imageTakenHandler = async (uri, angle) => {
+    if (angle === "FrontImage") {
+      setImage(uri);
+    } else {
+      setSideImage(uri);
+    }
+    Alert.alert("Guardar Image?", "", [
+      {
+        text: "No",
+        onPress: () => setImage(null),
+        style: "cancel",
+      },
+      { text: "Sí", onPress: () => uploadImage(uri, angle) },
+    ]);
+  };
+
+  const uploadImage = async (uri, angle) => {
     if (uri == null) {
       return null;
     }
+
     const response = await fetch(uri);
-    const blob = await response.blob();
+    const blobFile = await response.blob();
+
+    const storageRef = ref(storage, "UserBaseImages/" + `${user.uid}/` + angle);
+    const uploadTask = uploadBytesResumable(storageRef, blobFile);
     setUploading(true);
     setTransferred(0);
-    Toast.show({
-      type: "info",
-      autoHide: false,
-      text1: "Subiendo Foto",
-    });
-    // setFImage(uri);
-    const storageRef = firebase
-      .storage()
-      .ref()
-      .child("UserBaseImages/" + `${user.uid}/` + "FrontImage");
-    const task = storageRef.put(blob);
-    task.on("state_changed", (taskSnapshot) => {
-      console.log(
-        `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`
-      );
-      setTransferred(
-        (
-          (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
-          100
-        ).toFixed(0)
-      );
-    });
 
-    try {
-      await task;
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress = Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        );
+        setTransferred(progress);
+        console.log("Upload is " + progress + "% done");
+        switch (snapshot.state) {
+          case "paused":
+            console.log("Upload is paused");
+            break;
+          case "running":
+            console.log("Upload is running");
+            break;
+        }
+      },
+      (error) => {
+        switch (error.code) {
+          case "storage/unauthorized":
+            break;
+          case "storage/canceled":
+            break;
 
-      const url = await storageRef.getDownloadURL();
-      await db.doc(user.uid).set(
-        {
-          FrontImage: url,
-        },
-        { merge: true }
-      );
+          case "storage/unknown":
+            break;
+        }
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          imageUploadHandler(downloadURL, angle);
+        });
+      }
+    );
+  };
 
-      setUploading(false);
-      Toast.hide();
-
-      Alert.alert("Foto Subido!", "Tu foto ha subido exitosamente!");
-      fetchMemberDetails();
-
-      return url;
-    } catch (e) {
-      console.log(e);
-      return null;
-    }
-  });
-  const sideImageTakenHandler = useCallback(async (uri) => {
-    if (uri == null) {
-      return null;
-    }
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    setUploading(true);
-    setTransferred(0);
-    Toast.show({
-      type: "info",
-      autoHide: false,
-      text1: "Subiendo Foto",
-    }); // setFImage(uri);
-    const storageRef = firebase
-      .storage()
-      .ref()
-      .child("UserBaseImages/" + `${user.uid}/` + "SideImage");
-    const task = storageRef.put(blob);
-    task.on("state_changed", (taskSnapshot) => {
-      console.log(
-        `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`
-      );
-      setTransferred(
-        (
-          (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
-          100
-        ).toFixed(0)
-      );
-    });
-
-    try {
-      await task;
-
-      const url = await storageRef.getDownloadURL();
-      await db.doc(user.uid).set(
-        {
-          SideImage: url,
-        },
-        { merge: true }
-      );
-
-      setUploading(false);
-      Toast.hide();
-
-      Alert.alert("Foto Subido!", "Tu foto ha subido exitosamente!");
-      fetchMemberDetails();
-
-      return url;
-    } catch (e) {
-      console.log(e);
-      return null;
-    }
-  });
+  const imageUploadHandler = async (uri, angle) => {
+    await addImage(uri, angle);
+    setUploading(false);
+    Alert.alert("Foto Subido!", "Tu foto ha subido exitosamente!");
+    fetchMemberDetails();
+  };
 
   const dateHandler = useCallback(async (date) => {
     setEvalDateModal(false);
@@ -826,26 +800,41 @@ const ProfileScreen = ({ navigation }) => {
             </View>
 
             {showImagen && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginLeft: 30,
-                  marginRight: 30,
-                }}
-              >
-                <ImagePicker
-                  onImageTaken={frontImageTakenHandler}
-                  title="Imagen Frontal"
-                  source={userInfo.FrontImage}
-                  refresh={() => fetchMemberDetails()}
-                />
-                <ImagePicker
-                  onImageTaken={sideImageTakenHandler}
-                  title="Imagen Lateral"
-                  source={userInfo.SideImage}
-                  refresh={() => fetchMemberDetails()}
-                />
+              <View>
+                {uploading && (
+                  <View
+                    style={{ justifyContent: "center", alignItems: "center" }}
+                  >
+                    <ActivityIndicator size={"small"} />
+                    <Text>{transferred}%</Text>
+                  </View>
+                )}
+
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginLeft: 30,
+                    marginRight: 30,
+                  }}
+                >
+                  <ImagePicker
+                    onImageTaken={(uri) => {
+                      imageTakenHandler(uri, "FrontImage");
+                    }}
+                    title="Imagen Frontal"
+                    source={image ?? userInfo.FrontImage}
+                    refresh={() => fetchMemberDetails()}
+                  />
+                  <ImagePicker
+                    onImageTaken={(uri) => {
+                      imageTakenHandler(uri, "SideImage");
+                    }}
+                    title="Imagen Lateral"
+                    source={sideImage ?? userInfo.SideImage}
+                    refresh={() => fetchMemberDetails()}
+                  />
+                </View>
               </View>
             )}
           </View>

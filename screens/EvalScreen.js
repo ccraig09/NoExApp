@@ -34,6 +34,13 @@ import { AuthContext } from "../navigation/AuthProvider";
 import moment from "moment";
 import localization from "moment/locale/es-us";
 import { useFocusEffect } from "@react-navigation/native";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
 
 let screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -41,8 +48,10 @@ const screenHeight = Dimensions.get("window").height;
 StatusBar.setHidden(true);
 
 const EvalScreen = ({ navigation: { goBack }, navigation, route }) => {
-  const { user, newEval, deleteEval } = useContext(AuthContext);
+  const { user, newEval, deleteEval, addEvalImage } = useContext(AuthContext);
   const { evalId, evalTitle, Age, Gender } = route.params;
+  const [image, setImage] = useState(null);
+  const [sideImage, setSideImage] = useState(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [showEval, setShowEval] = useState(true);
@@ -60,6 +69,7 @@ const EvalScreen = ({ navigation: { goBack }, navigation, route }) => {
   const [error, setError] = useState();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const db = firebase.firestore().collection("Members");
+  const storage = getStorage();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -113,119 +123,81 @@ const EvalScreen = ({ navigation: { goBack }, navigation, route }) => {
       console.log(e);
     }
   };
-  const frontImageTakenHandler = useCallback(async (uri) => {
+
+  const imageTakenHandler = async (uri, angle) => {
+    if (angle === "FrontImage") {
+      setImage(uri);
+    } else {
+      setSideImage(uri);
+    }
+    Alert.alert("Guardar Image?", "", [
+      {
+        text: "No",
+        onPress: () => setImage(null),
+        style: "cancel",
+      },
+      { text: "Sí", onPress: () => uploadImage(uri, angle) },
+    ]);
+  };
+
+  const uploadImage = async (uri, angle) => {
     if (uri == null) {
       return null;
     }
+
     const response = await fetch(uri);
-    const blob = await response.blob();
+    const blobFile = await response.blob();
+
+    const storageRef = ref(
+      storage,
+      "UserBaseImages/" + `${user.uid}/` + `${evalTitle}/` + angle
+    );
+    const uploadTask = uploadBytesResumable(storageRef, blobFile);
     setUploading(true);
     setTransferred(0);
-    Toast.show({
-      type: "info",
-      autoHide: false,
-      text1: "Subiendo Foto",
-    });
-    // setFImage(uri);
-    const storageRef = firebase
-      .storage()
-      .ref()
-      .child(
-        "UserBaseImages/" + `${user.uid}/` + `${evalTitle}/` + "FrontImage"
-      );
-    const task = storageRef.put(blob);
-    task.on("state_changed", (taskSnapshot) => {
-      console.log(
-        `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`
-      );
-      setTransferred(
-        (
-          (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
-          100
-        ).toFixed(0)
-      );
-    });
 
-    try {
-      await task;
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress = Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        );
+        setTransferred(progress);
+        console.log("Upload is " + progress + "% done");
+        switch (snapshot.state) {
+          case "paused":
+            console.log("Upload is paused");
+            break;
+          case "running":
+            console.log("Upload is running");
+            break;
+        }
+      },
+      (error) => {
+        switch (error.code) {
+          case "storage/unauthorized":
+            break;
+          case "storage/canceled":
+            break;
 
-      const url = await storageRef.getDownloadURL();
-      await db.doc(user.uid).collection("Member Evals").doc(evalId).set(
-        {
-          FrontImage: url,
-        },
-        { merge: true }
-      );
+          case "storage/unknown":
+            break;
+        }
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          imageUploadHandler(downloadURL, angle);
+        });
+      }
+    );
+  };
 
-      setUploading(false);
-      Toast.hide();
-
-      Alert.alert("Foto Subido!", "Tu foto ha subido exitosamente!");
-      fetchMemberDetails();
-
-      return url;
-    } catch (e) {
-      console.log(e);
-      return null;
-    }
-  });
-
-  const sideImageTakenHandler = useCallback(async (uri) => {
-    if (uri == null) {
-      return null;
-    }
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    setUploading(true);
-    setTransferred(0);
-    Toast.show({
-      type: "info",
-      autoHide: false,
-      text1: "Subiendo Foto",
-    });
-    // setFImage(uri);
-    const storageRef = firebase
-      .storage()
-      .ref()
-      .child(
-        "UserBaseImages/" + `${user.uid}/` + `${evalTitle}/` + "SideImage"
-      );
-    const task = storageRef.put(blob);
-    task.on("state_changed", (taskSnapshot) => {
-      console.log(
-        `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`
-      );
-      setTransferred(
-        (
-          (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
-          100
-        ).toFixed(0)
-      );
-    });
-
-    try {
-      await task;
-
-      const url = await storageRef.getDownloadURL();
-      await db.doc(user.uid).collection("Member Evals").doc(evalId).set(
-        {
-          SideImage: url,
-        },
-        { merge: true }
-      );
-
-      setUploading(false);
-      Toast.hide();
-
-      Alert.alert("Foto Subido!", "Tu foto ha subido exitosamente!");
-      fetchMemberDetails();
-
-      return url;
-    } catch (e) {
-      console.log(e);
-      return null;
-    }
-  });
+  const imageUploadHandler = async (uri, angle) => {
+    await addEvalImage(uri, angle, evalId);
+    setUploading(false);
+    Alert.alert("Foto Subido!", "Tu foto ha subido exitosamente!");
+    fetchMemberDetails();
+  };
 
   const deleteHandler = async (docId) => {
     Alert.alert("Borrar Evaluacion?", "Quiere borrar este evaluación?", [
@@ -402,30 +374,44 @@ const EvalScreen = ({ navigation: { goBack }, navigation, route }) => {
             </View>
 
             {showImagen && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginLeft: 30,
-                  marginRight: 30,
-                }}
-              >
-                <ImagePicker
-                  onImageTaken={frontImageTakenHandler}
-                  title="Frontal"
-                  source={userInfo.FrontImage}
-                  refresh={() => fetchMemberDetails()}
-                  Eid={evalTitle}
-                  docId={evalId}
-                />
-                <ImagePicker
-                  onImageTaken={sideImageTakenHandler}
-                  title="Lateral"
-                  source={userInfo.SideImage}
-                  refresh={() => fetchMemberDetails()}
-                  Eid={evalTitle}
-                  docId={evalId}
-                />
+              <View>
+                {uploading && (
+                  <View
+                    style={{ justifyContent: "center", alignItems: "center" }}
+                  >
+                    <ActivityIndicator size={"small"} />
+                    <Text>{transferred}%</Text>
+                  </View>
+                )}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginLeft: 30,
+                    marginRight: 30,
+                  }}
+                >
+                  <ImagePicker
+                    onImageTaken={(uri) => {
+                      imageTakenHandler(uri, "FrontImage");
+                    }}
+                    title="Frontal"
+                    source={image ?? userInfo.FrontImage}
+                    refresh={() => fetchMemberDetails()}
+                    Eid={evalTitle}
+                    docId={evalId}
+                  />
+                  <ImagePicker
+                    onImageTaken={(uri) => {
+                      imageTakenHandler(uri, "SideImage");
+                    }}
+                    title="Lateral"
+                    source={sideImage ?? userInfo.SideImage}
+                    refresh={() => fetchMemberDetails()}
+                    Eid={evalTitle}
+                    docId={evalId}
+                  />
+                </View>
               </View>
             )}
           </View>
