@@ -17,7 +17,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 
 import styled, { useTheme } from "styled-components";
-import { Avatar, Button } from "react-native-elements";
+import { Avatar, Button, Tooltip } from "react-native-elements";
 import EvalBlock from "../components/EvalBlock";
 import * as Linking from "expo-linking";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -541,6 +541,24 @@ const ProfileScreen = ({ navigation }) => {
                 ) : (
                   <Text>{userInfo.BaseStartDate}</Text>
                 )}
+                <Tooltip
+                  height={200}
+                  width={200}
+                  popover={
+                    <Text style={styles.tooltipText}>
+                      Para aprender mas, visita
+                      https://www.omnicalculator.com/health/lean-body-mass
+                    </Text>
+                  }
+                  backgroundColor={Colors.noExprimary}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Icon name="information-circle" color={"gray"} />
+                    <Text style={{ marginLeft: 5, color: "gray" }}>
+                      Referencia
+                    </Text>
+                  </View>
+                </Tooltip>
               </View>
 
               <View style={{ padding: 6 }}>
