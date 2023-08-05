@@ -7,6 +7,8 @@ import {
   createUserWithEmailAndPassword,
 } from "firebase/auth";
 
+import { getStorage, ref, deleteObject } from "firebase/storage";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const AuthContext = createContext();
@@ -18,6 +20,7 @@ export const AuthProvider = ({ children, navigation }) => {
   const dbME = firebase.firestore().collection("Members");
   const dbCN = firebase.firestore().collection("ClientNotificationHistory");
   const auth = getAuth();
+  const storage = getStorage();
 
   const firebaseErrors = {
     "auth/app-deleted": "No se encontró la base de datos",
@@ -765,6 +768,52 @@ export const AuthProvider = ({ children, navigation }) => {
             console.log(errorMes);
           }
         },
+        addImage: async (url, angle) => {
+          try {
+            if (angle === "FrontImage") {
+              await db.doc(user.uid).set(
+                {
+                  FrontImage: url,
+                },
+                { merge: true }
+              );
+            } else {
+              await db.doc(user.uid).set(
+                {
+                  SideImage: url,
+                },
+                { merge: true }
+              );
+            }
+          } catch (e) {
+            const errorMes = firebaseErrors[e.code];
+            alert(errorMes);
+            console.log(errorMes);
+          }
+        },
+        addEvalImage: async (url, angle, evalId) => {
+          try {
+            if (angle === "FrontImage") {
+              await db.doc(user.uid).collection("Member Evals").doc(evalId).set(
+                {
+                  FrontImage: url,
+                },
+                { merge: true }
+              );
+            } else {
+              await db.doc(user.uid).collection("Member Evals").doc(evalId).set(
+                {
+                  SideImage: url,
+                },
+                { merge: true }
+              );
+            }
+          } catch (e) {
+            const errorMes = firebaseErrors[e.code];
+            alert(errorMes);
+            console.log(errorMes);
+          }
+        },
         editEval: async (evalInfo, evalId) => {
           // console.log("creating new eval", title);
           try {
@@ -807,40 +856,37 @@ export const AuthProvider = ({ children, navigation }) => {
         },
         deleteImage: async (type) => {
           console.log("Deleting Image", type);
+          const deleteRef = ref(storage, `UserBaseImages/${user.uid}/${type}`);
+
           try {
-            await firebase
-              .storage()
-              .ref()
-              .child(`UserBaseImages/${user.uid}/${type}`)
-              .delete()
-              .then(
-                dbME.doc(user.uid).update({
-                  [type]: firebase.firestore.FieldValue.delete(),
-                })
-              );
+            await deleteObject(deleteRef).then(() => {
+              dbME.doc(user.uid).update({
+                [type]: firebase.firestore.FieldValue.delete(),
+              });
+            });
           } catch (e) {
             const errorMes = firebaseErrors[e.code];
-            alert(errorMes);
-            console.log(errorMes);
+            alert(e);
+            console.log(e);
           }
         },
         deleteEvalImage: async (type, Eid, docId) => {
           console.log("Deleting Image", type);
+          const deleteRef = ref(
+            storage,
+            `UserBaseImages/${user.uid}/${Eid}/${type}`
+          );
+
           try {
-            await firebase
-              .storage()
-              .ref()
-              .child(`UserBaseImages/${user.uid}/${Eid}/${type}`)
-              .delete()
-              .then(
-                dbME
-                  .doc(user.uid)
-                  .collection("Member Evals")
-                  .doc(docId)
-                  .update({
-                    [type]: firebase.firestore.FieldValue.delete(),
-                  })
-              );
+            await deleteObject(deleteRef).then(() => {
+              dbME
+                .doc(user.uid)
+                .collection("Member Evals")
+                .doc(docId)
+                .update({
+                  [type]: firebase.firestore.FieldValue.delete(),
+                });
+            });
           } catch (e) {
             const errorMes = firebaseErrors[e.code];
             alert(errorMes);
