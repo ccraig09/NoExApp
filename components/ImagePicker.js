@@ -9,6 +9,7 @@ import {
   Alert,
   TouchableHighlight,
   TouchableOpacity,
+  Linking,
 } from "react-native";
 // import { useDispatch } from "react-redux";
 import * as ImagePicker from "expo-image-picker";
@@ -56,12 +57,27 @@ const ImgPicker = (props) => {
     // })();
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     await ImagePicker.requestCameraPermissionsAsync();
+
     if (status !== "granted") {
       Alert.alert(
         "¡Permisos insuficientes!",
         "Lo siento, necesitamos permiso para acceder a la cámara.",
-        [{ text: "Listo" }]
+        [
+          { text: "Listo", style: "destructive" },
+          {
+            text: "Configuraciones",
+            style: "default",
+            onPress: () => {
+              if (Platform.OS === "ios") {
+                Linking.openURL("app-settings:");
+              } else {
+                Linking.openSettings();
+              }
+            },
+          },
+        ]
       );
+      return;
     }
     return true;
   };
@@ -72,6 +88,10 @@ const ImgPicker = (props) => {
 
   const takePhotoFromCamera = async () => {
     console.log("opening Camara");
+    const hasPermission = await verifyPermissions();
+    if (!hasPermission) {
+      return;
+    }
 
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -79,11 +99,11 @@ const ImgPicker = (props) => {
       aspect: [4, 3],
       quality: 0.7,
     });
-    console.log(result);
+    console.log(result?.assets[0]?.uri);
     actionSheetRef.current?.hide();
 
     if (!result.canceled) {
-      props.onImageTaken(result.uri);
+      props.onImageTaken(result.assets[0].uri);
     }
   };
 
@@ -104,6 +124,10 @@ const ImgPicker = (props) => {
 
   const choosePhotoFromLibrary = async () => {
     console.log("opening gallery");
+    const hasPermission = await verifyPermissions();
+    if (!hasPermission) {
+      return;
+    }
 
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -186,7 +210,7 @@ const ImgPicker = (props) => {
       <ActionSheet ref={actionSheetRef} bounceOnOpen={true}>
         <View style={{ alignItems: "center" }}>
           <Text style={styles.panelTitle}>Subir Foto</Text>
-          <Text style={styles.panelSubtitle}>Eligir Foto de Perfil</Text>
+          <Text style={styles.panelSubtitle}>Eligir Foto</Text>
         </View>
 
         <TouchableOpacity
