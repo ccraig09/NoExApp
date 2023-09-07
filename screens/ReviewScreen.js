@@ -29,22 +29,32 @@ const ReviewScreen = ({ navigation, route }) => {
             if (doc.exists) {
               console.log("Document data:", doc.data());
               if (doc.data().lastWatched === today) {
-                alert(
-                  `Felcidades! Ya Ganaste tus puntos de este video por el dia.`
+                Alert.alert(
+                  "¡Felicidades!",
+                  "Ya completaste tus puntos por el día de esta rutina 🙅🏽‍♀️",
+                  [{ text: "Listo", onPress: () => console.log("OK Pressed") }]
                 );
               } else {
                 // doc.data() will be undefined in this case
                 console.log("Not same day, giving points");
                 addVideoPoints(videoInfo?.points);
                 updateWatchHistory(videoInfo?.Title, videoInfo?.points, today);
-                alert(`Felcidades! Ganaste ${videoInfo?.points} puntos.`);
+                Alert.alert(
+                  "¡Felicidades!",
+                  `Haz ganado ${videoInfo?.points} por tu esfuerzo del día 🙅🏽‍♀️🔥`,
+                  [{ text: "Listo", onPress: () => console.log("OK Pressed") }]
+                );
               }
             } else {
               // doc.data() will be undefined in this case
               console.log("No such document???");
               addVideoPoints(videoInfo?.points);
               updateWatchHistory(videoInfo?.Title, videoInfo?.points, today);
-              alert(`Felcidades! Ganaste ${videoInfo?.points} puntos.`);
+              Alert.alert(
+                "¡Felicidades!",
+                `Haz ganado ${videoInfo?.points} por tu esfuerzo del día 🙅🏽‍♀️🔥`,
+                [{ text: "Listo", onPress: () => console.log("OK Pressed") }]
+              );
             }
           });
       } catch (e) {
