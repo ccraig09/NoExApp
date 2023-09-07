@@ -18,6 +18,7 @@ export const AuthProvider = ({ children, navigation }) => {
   const db = firebase.firestore().collection("Members");
   const dbN = firebase.firestore().collection("Notifications");
   const dbME = firebase.firestore().collection("Members");
+  const dbWH = firebase.firestore().collection("Members");
   const dbCN = firebase.firestore().collection("ClientNotificationHistory");
   const auth = getAuth();
   const storage = getStorage();
@@ -666,6 +667,40 @@ export const AuthProvider = ({ children, navigation }) => {
             console.log(errorMes);
           }
         },
+        updateWatchHistory: async (title, points, date) => {
+          try {
+            await dbME.doc(user.uid).collection("Watch History").doc(title).set(
+              {
+                lastWatched: date,
+                points: points,
+              },
+              { merge: true }
+            );
+          } catch (e) {
+            const errorMes = firebaseErrors[e.code];
+            alert(errorMes);
+            console.log(errorMes);
+          }
+        },
+
+        addVideoPoints: async (points) => {
+          console.log(points);
+          const increment = firebase.firestore.FieldValue.increment(points);
+
+          try {
+            await db.doc(user.uid).set(
+              {
+                points: increment,
+              },
+              { merge: true }
+            );
+          } catch (e) {
+            const errorMes = firebaseErrors[e.code];
+            alert(errorMes);
+            console.log(errorMes);
+          }
+        },
+
         addPoints: async (points) => {
           console.log(points);
           const increment = firebase.firestore.FieldValue.increment(-points);

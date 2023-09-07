@@ -41,6 +41,7 @@ const SectionScreen = ({ route, navigation }) => {
             description={itemData.item.description}
             onClassClick={() => {
               navigation.navigate("Video", {
+                videoInfo: itemData.item,
                 url: itemData.item.url,
                 classId: classId,
                 classes: classes,

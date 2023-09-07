@@ -1,13 +1,60 @@
 import { StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
-import React from "react";
+import React, { useEffect, useContext, useState } from "react";
 import { Video } from "expo-av";
 import CircleButton from "../components/UI/CircleButton";
 import Colors from "../constants/Colors";
 import * as MediaLibrary from "expo-media-library";
+import firebase from "../components/firebase";
+import moment from "moment";
+import { AuthContext } from "../navigation/AuthProvider";
 
 const ReviewScreen = ({ navigation, route }) => {
-  const { selectedVideo, classId, classes, video } = route.params;
-  console.log("what is this url review", selectedVideo);
+  const { videoInfo, classId, classes, video } = route.params;
+  const { user, addVideoPoints, updateWatchHistory } = useContext(AuthContext);
+  console.log("what is this url review", videoInfo);
+
+  useEffect(() => {
+    const today = moment().format("YYYY-MM-DD");
+
+    const fetchWatchHistory = async () => {
+      try {
+        await firebase
+          .firestore()
+          .collection("Members")
+          .doc(user.uid)
+          .collection("Watch History")
+          .doc(videoInfo?.Title)
+          .get()
+          .then((doc) => {
+            if (doc.exists) {
+              console.log("Document data:", doc.data());
+              if (doc.data().lastWatched === today) {
+                alert(
+                  `Felcidades! Ya Ganaste tus puntos de este video por el dia.`
+                );
+              } else {
+                // doc.data() will be undefined in this case
+                console.log("Not same day, giving points");
+                addVideoPoints(videoInfo?.points);
+                updateWatchHistory(videoInfo?.Title, videoInfo?.points, today);
+                alert(`Felcidades! Ganaste ${videoInfo?.points} puntos.`);
+              }
+            } else {
+              // doc.data() will be undefined in this case
+              console.log("No such document???");
+              addVideoPoints(videoInfo?.points);
+              updateWatchHistory(videoInfo?.Title, videoInfo?.points, today);
+              alert(`Felcidades! Ganaste ${videoInfo?.points} puntos.`);
+            }
+          });
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    fetchWatchHistory();
+  }, []);
+
   return (
     <View style={styles.container}>
       <View style={styles.buttonRow}>
