@@ -2,11 +2,11 @@ import React from "react";
 import VideoItem from "../components/VideoItem";
 
 const VideoScreen = ({ navigation, route }) => {
-  const { url, classId, classes } = route.params;
+  const { videoInfo, url, classId, classes } = route.params;
   // const data = classes;
   // const selectedVideo = data.find((key) => key.key === classId);
 
-  console.log("testing the selected video", route.params);
+  console.log("testing the selected video", videoInfo);
   return (
     <VideoItem
       video={url}
@@ -16,7 +16,7 @@ const VideoScreen = ({ navigation, route }) => {
       reviewNav={(video) => {
         navigation.navigate("Review", {
           video: video,
-          // selectedVideo: selectedVideo,
+          videoInfo: videoInfo,
           classId: classId,
           classes: classes,
         });
